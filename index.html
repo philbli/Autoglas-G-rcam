@@ -255,7 +255,7 @@ textarea.fc { resize: vertical; min-height: 76px; }
   min-height: 1123px;
   background: white;
   box-shadow: 0 3px 30px rgba(0,0,0,0.22);
-  padding: 58px 68px 50px;
+  padding: 48px 68px 42px;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 10.5pt;
   color: #1a1a1a;
@@ -1004,25 +1004,39 @@ async function downloadPDF() {
   setStep(3);
   showLoading('PDF wird erstellt…');
 
-  const page  = document.getElementById('a4Page');
   const rechnr = g('f_rechnr') || 'export';
 
-  // Temporarily remove transform for clean capture
-  const savedTransform = page.style.transform;
-  const savedMarginB   = page.style.marginBottom;
-  page.style.transform    = 'scale(1)';
-  page.style.marginBottom = '0';
+  /* Das Dokument wird in einen sauberen Container am Seitenanfang geklont:
+     - umgeht den html2canvas-Scroll-Bug (weißer Versatz oben, wenn die
+       Seite beim Export gescrollt ist)
+     - feste Höhe knapp UNTER html2pdfs A4-Seitenhöhe (1122,94 px bei
+       794 px Breite), sonst entsteht durch Rundung eine leere zweite Seite */
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:absolute;top:0;left:0;width:794px;background:#fff;z-index:-1;';
+  const clone = document.getElementById('a4Page').cloneNode(true);
+  clone.removeAttribute('id');
+  clone.style.transform    = 'none';
+  clone.style.marginBottom = '0';
+  clone.style.width        = '794px';
+  clone.style.height       = '1120px';
+  clone.style.minHeight    = '0';
+  clone.style.overflow     = 'hidden';
+  wrap.appendChild(clone);
+  document.body.appendChild(wrap);
 
   // SVG-Logo durch PNG ersetzen – html2canvas rastert SVG-Verläufe unzuverlässig
-  const logoHolder = page.querySelector('.dh-logo');
-  let logoRestore = null;
   try {
     const { dataUrl } = await renderLogo();
-    logoRestore = logoHolder.innerHTML;
-    logoHolder.innerHTML = `<img src="${dataUrl}" style="width:205px;display:block" alt="">`;
-    const li = logoHolder.querySelector('img');
-    if (!li.complete) await new Promise(r => { li.onload = r; li.onerror = r; });
+    const lh = clone.querySelector('.dh-logo');
+    if (lh) {
+      lh.innerHTML = `<img src="${dataUrl}" style="width:205px;display:block" alt="">`;
+      const li = lh.querySelector('img');
+      if (!li.complete) await new Promise(r => { li.onload = r; li.onerror = r; });
+    }
   } catch (e) { /* SVG bleibt als Fallback stehen */ }
+
+  const sx = window.scrollX, sy = window.scrollY;
+  window.scrollTo(0, 0);
 
   try {
     await html2pdf()
@@ -1030,10 +1044,11 @@ async function downloadPDF() {
         margin:      0,
         filename:    `Vorsteuer-Rechnung_${rechnr}.pdf`,
         image:       { type: 'jpeg', quality: 0.97 },
-        html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+        html2canvas: { scale: 2, useCORS: true, logging: false,
+                       backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
         jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
       })
-      .from(page)
+      .from(clone)
       .save();
     toast('PDF erfolgreich heruntergeladen!', 'success');
   } catch (err) {
@@ -1041,9 +1056,8 @@ async function downloadPDF() {
     console.error(err);
   }
 
-  if (logoRestore !== null) logoHolder.innerHTML = logoRestore;
-  page.style.transform    = savedTransform;
-  page.style.marginBottom = savedMarginB;
+  window.scrollTo(sx, sy);
+  wrap.remove();
   hideLoading();
 }
 
