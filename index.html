@@ -264,45 +264,32 @@ textarea.fc { resize: vertical; min-height: 76px; }
 }
 .a4 .dh {
   display: flex; justify-content: space-between; align-items: flex-end;
-  padding-bottom: 12px; margin-bottom: 8px;
-  border-bottom: 3px solid #2C2C2C;
+  margin-bottom: 6px;
 }
-.a4 .dh-logo svg { width: 215px; height: auto; display: block; }
-.a4 .dh-addr { text-align: right; font-size: 8.5pt; color: #1a1a1a; line-height: 1.65; white-space: nowrap; }
+.a4 .dh-logo svg { width: 205px; height: auto; display: block; }
+.a4 .dh-addr {
+  text-align: right; font-size: 8.5pt; color: #1a1a1a; line-height: 1.6;
+  white-space: nowrap; flex: 1; margin-left: 150px;
+  border-bottom: 3px solid #2C2C2C; padding-bottom: 10px;
+}
 .a4 .dsender {
   font-size: 7.5pt; color: #333; text-decoration: underline;
-  margin: 30px 0 8px;
+  margin: 36px 0 10px;
 }
-.a4 .drecip-addr { font-size: 10.5pt; line-height: 1.65; }
-.a4 .ddate { text-align: right; font-size: 8.5pt; color: #888; margin: 10px 0 0; }
-.a4 .dtitle {
-  font-size: 15pt; font-weight: 700; color: #1a1a1a;
-  margin: 26px 0 18px;
-  padding-bottom: 7px;
-  border-bottom: 1px solid #ddd;
+.a4 .drow {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 56px;
 }
-.a4 .dreftbl { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 9.5pt; }
-.a4 .dreftbl td { padding: 5px 9px; vertical-align: top; }
-.a4 .dreftbl td:first-child { font-weight: 600; color: #555; width: 42%; white-space: nowrap; }
-.a4 .dreftbl tr:nth-child(odd) td { background: #f7f7f7; }
-.a4 .dnotice {
-  background: #FFF3F5; border-left: 4px solid #C8102E;
-  padding: 11px 15px; margin: 18px 0; border-radius: 0 4px 4px 0;
-  font-size: 10pt;
+.a4 .drecip-addr { font-size: 10.5pt; line-height: 1.6; }
+.a4 .ddate { font-size: 10.5pt; }
+.a4 .dtit-row {
+  display: flex; justify-content: space-between;
+  font-size: 10.5pt; margin: 0 0 16px;
 }
-.a4 .damttbl { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 10pt; }
-.a4 .damttbl th {
-  background: #2C2C2C; color: white;
-  padding: 7px 11px; text-align: left; font-size: 8.5pt; font-weight: 600;
-}
-.a4 .damttbl th:last-child { text-align: right; }
-.a4 .damttbl td { padding: 7px 11px; border-bottom: 1px solid #eee; }
-.a4 .damttbl td:last-child { text-align: right; font-weight: 500; }
-.a4 .damttbl .row-total td {
-  background: #FFF3F5; font-weight: 700; color: #C8102E;
-  border-top: 2px solid #C8102E; border-bottom: none;
-}
-.a4 .dpay-hint { font-size: 9.5pt; color: #444; margin: 20px 0 28px; line-height: 1.75; }
+.a4 .dbody p { font-size: 10.5pt; line-height: 1.55; margin: 0 0 16px; }
+.a4 .dveh { margin: 24px 0 24px; font-weight: bold; font-size: 10.5pt; }
+.a4 .dveh > div { display: flex; margin-bottom: 3px; }
+.a4 .dveh .vl { width: 170px; flex-shrink: 0; }
 .a4 .dfoot {
   padding-top: 10px; border-top: 3px solid #2C2C2C;
   font-size: 7.5pt; color: #333; line-height: 1.85;
@@ -453,30 +440,10 @@ textarea.fc { resize: vertical; min-height: 76px; }
         </div>
 
         <div class="fsec">
-          <div class="fsec-title">Beträge (€)</div>
+          <div class="fsec-title">Steuer</div>
           <div class="fg">
-            <label for="f_netto">Nettobetrag (erscheint nicht im Dokument)</label>
-            <input class="fc" id="f_netto" type="text" placeholder="0,00" oninput="updatePreview()">
-          </div>
-          <div class="fg">
-            <label for="f_mwst">MwSt.-Gesamtbetrag 19&nbsp;%</label>
+            <label for="f_mwst">MwSt.-Betrag 19&nbsp;% in € (einziger Betrag im Dokument)</label>
             <input class="fc" id="f_mwst" type="text" placeholder="0,00" oninput="updatePreview()">
-          </div>
-          <div class="fg">
-            <label for="f_brutto">Rechnungsbetrag brutto (erscheint nicht im Dokument)</label>
-            <input class="fc" id="f_brutto" type="text" placeholder="0,00" oninput="updatePreview()">
-          </div>
-          <div class="fg">
-            <label for="f_sb">SB-Anteil / Selbstbeteiligung</label>
-            <input class="fc" id="f_sb" type="text" placeholder="0,00" oninput="updatePreview()">
-          </div>
-          <div class="fg">
-            <label for="f_zahln">Zahlbetrag Versicherungsnehmer</label>
-            <input class="fc" id="f_zahln" type="text" placeholder="0,00" oninput="updatePreview()">
-          </div>
-          <div class="fg">
-            <label for="f_zahlv">Zahlbetrag Versicherung</label>
-            <input class="fc" id="f_zahlv" type="text" placeholder="0,00" oninput="updatePreview()">
           </div>
         </div>
 
@@ -547,34 +514,45 @@ if (typeof pdfjsLib !== 'undefined') {
 }
 
 const FORM_IDS = ['f_kunde','f_rechnr','f_rechdat','f_auftnr','f_auftdat',
-                   'f_kz','f_fzg','f_netto','f_mwst','f_brutto','f_sb','f_zahln','f_zahlv'];
+                   'f_kz','f_fzg','f_mwst'];
 
-/* Nachbau des Firmenlogos (rotes A auf grauem G + Schriftzug) als Vektor.
+/* Nachbau des Firmenlogos (schwarzes G mit Verlauf, rotes A, Schriftzug) als Vektor.
    Wird in der Vorschau/PDF inline gerendert und für Word als PNG eingebettet. */
-const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="110" viewBox="0 0 320 110">
-  <text x="0" y="94" font-family="'Arial Black', Arial, sans-serif" font-size="106" font-weight="900" fill="#3A3A3A">G</text>
-  <text x="15" y="76" font-family="'Arial Black', Arial, sans-serif" font-size="80" font-weight="900" fill="#C8102E">A</text>
-  <text x="102" y="50" font-family="Arial, sans-serif" font-size="28" font-weight="bold" letter-spacing="3.5" fill="#C8102E">AUTOGLAS</text>
-  <text x="102" y="90" font-family="'Arial Black', Arial, sans-serif" font-size="33" font-weight="900" letter-spacing="4.5" fill="#1A1A1A">GÜRCAM</text>
+const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="380" viewBox="0 0 800 380">
+  <defs>
+    <linearGradient id="lgG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d0d0d"/><stop offset="1" stop-color="#4d4d4d"/>
+    </linearGradient>
+    <linearGradient id="lgA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d63447"/><stop offset="1" stop-color="#9e0e1f"/>
+    </linearGradient>
+  </defs>
+  <path d="M 313 104 A 150 150 0 1 0 313 276" fill="none" stroke="url(#lgG)" stroke-width="72"/>
+  <path d="M193 2 L237 2 L352 380 L298 380 L215 122 L132 380 L78 380 Z" fill="url(#lgA)"/>
+  <rect x="160" y="158" width="216" height="64" fill="url(#lgG)"/>
+  <text x="408" y="222" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="#C8102E" textLength="385" lengthAdjust="spacingAndGlyphs">AUTOGLAS</text>
+  <text x="408" y="342" font-family="'Arial Black', Arial, sans-serif" font-size="92" font-weight="900" fill="#141414" textLength="385" lengthAdjust="spacingAndGlyphs">GÜRCAM</text>
 </svg>`;
 
-let _logoPngCache = null;
-async function renderLogoPng() {
-  if (_logoPngCache) return _logoPngCache;
+let _logoCache = null;
+async function renderLogo() {
+  if (_logoCache) return _logoCache;
   const url = URL.createObjectURL(new Blob([LOGO_SVG], { type: 'image/svg+xml;charset=utf-8' }));
   try {
     const img = new Image();
     await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
     const c = document.createElement('canvas');
-    c.width = 960; c.height = 330;
+    c.width = 1200; c.height = 570;
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const dataUrl = c.toDataURL('image/png');
     const blob = await new Promise(r => c.toBlob(r, 'image/png'));
-    _logoPngCache = await blob.arrayBuffer();
-    return _logoPngCache;
+    _logoCache = { buf: await blob.arrayBuffer(), dataUrl };
+    return _logoCache;
   } finally {
     URL.revokeObjectURL(url);
   }
 }
+async function renderLogoPng() { return (await renderLogo()).buf; }
 
 /* ============================================================
    DRAG & DROP / FILE INPUT
@@ -735,41 +713,12 @@ function parseInvoice(txt, lines, items) {
   if (fzg) fzg = fzg.trim();
   set('f_fzg', fzg, 'Fahrzeug');
 
-  // ── Nettobetrag ──────────────────────────────────────────
-  let netto = grab([/Nettobetrag\s*:?\s*([\d.,]+)\s*€?/i], cleanAmt);
-  set('f_netto', netto, 'Nettobetrag');
-
-  // ── MwSt ─────────────────────────────────────────────────
+  // ── MwSt (einziger Betrag, der ins Dokument übernommen wird) ──
   let mwst = grab([
     /MwSt\.?\s*:?\s*19\s*%\s*([\d.,]+)\s*€?/i,
     /19\s*%\s+([\d.,]+)\s*€/i,
   ], cleanAmt);
   set('f_mwst', mwst, 'MwSt.-Betrag');
-
-  // ── Rechnungsbetrag (brutto) ──────────────────────────────
-  let brutto = grab([/Rechnungsbetrag\s*:?\s*([\d.,]+)\s*€?/i], cleanAmt);
-  set('f_brutto', brutto, 'Rechnungsbetrag');
-
-  // ── SB-Anteil ────────────────────────────────────────────
-  let sb = grab([
-    /SB[\s-]?Anteil\s*:?\s*([\d.,]+)\s*€?/i,
-    /Selbstbeteiligungs?\s*:?\s*([\d.,]+)\s*€?/i,
-  ], cleanAmt);
-  set('f_sb', sb, 'SB-Anteil');
-
-  // ── Zahlbetrag VN ────────────────────────────────────────
-  let zahln = grab([
-    /Zahlbetrag\s+Versicherungsnehmer\s*:?\s*([\d.,]+)\s*€?/i,
-    /Versicherungsnehmer\s*:?\s*([\d.,]+)\s*€/i,
-  ], cleanAmt);
-  set('f_zahln', zahln, 'Zahlbetrag VN');
-
-  // ── Zahlbetrag Versicherung ──────────────────────────────
-  let zahlv = grab([
-    /Zahlbetrag\s+Versicherung\b[^n][^e][^h]*?:?\s*([\d.,]+)\s*€?/i,
-    /(?<![Nn]ehmer\s)Versicherung\s*:?\s*([\d.,]+)\s*€/i,
-  ], cleanAmt);
-  set('f_zahlv', zahlv, 'Zahlbetrag Versicherung');
 
   // ── Kundenanschrift ──────────────────────────────────────
   const kunde = parseAddress(txt, lines);
@@ -836,66 +785,58 @@ function updatePreview() {
   const auftdat = g('f_auftdat');
   const kz      = g('f_kz');
   const fzg     = g('f_fzg');
-  const netto   = g('f_netto');
   const mwst    = g('f_mwst');
-  const brutto  = g('f_brutto');
-  const sb      = g('f_sb');
-  const zahln   = g('f_zahln');
-  const zahlv   = g('f_zahlv');
   const today   = new Date().toLocaleDateString('de-DE');
 
   const addrHtml = kunde
     ? kunde.split('\n').map(l => `<div>${esc(l)}</div>`).join('')
     : '<span style="color:#ccc;font-style:italic">Kundenanschrift</span>';
 
-  // Betragsaufstellung: nur MwSt.-Gesamtbetrag, SB und Zahlbeträge –
-  // Netto-/Bruttobetrag der Rechnung erscheinen bewusst NICHT im Dokument.
-  let amtRows = '';
-  if (sb)    amtRows += `<tr><td>SB-Anteil (Selbstbeteiligung)</td><td>${esc(sb)}&thinsp;€</td></tr>`;
-  if (mwst)  amtRows += `<tr class="row-total"><td>MwSt.-Gesamtbetrag (19&nbsp;%)</td><td>${esc(mwst)}&thinsp;€</td></tr>`;
-  if (zahln) amtRows += `<tr><td><strong>Zahlbetrag Versicherungsnehmer</strong></td><td><strong>${esc(zahln)}&thinsp;€</strong></td></tr>`;
-  if (zahlv) amtRows += `<tr><td>Zahlbetrag Versicherung</td><td>${esc(zahlv)}&thinsp;€</td></tr>`;
-
+  // Briefinhalt 1:1 nach Vorlage – einziger ausgewiesener Betrag ist die MwSt.
   document.getElementById('a4Page').innerHTML = `
 <div class="dh">
   <div class="dh-logo">${LOGO_SVG}</div>
   <div class="dh-addr">
     <strong>Autoglas Gürcam</strong><br>
     <strong>Gürce Ali &amp; Toksun Halil GbR</strong><br>
-    Industriestraße 11<br>
+    Industrie Straße 11<br>
     65779 Kelkheim (Taunus)<br>
     Tel.: +49 176 2350 8710&nbsp;&nbsp;|&nbsp;&nbsp;E-Mail: info@autoglas-guercam.com
   </div>
 </div>
 
 <div class="dsender">AUTOGLAS GÜRCAM - Industriestraße 11, 65779 Kelkheim</div>
-<div class="drecip-addr">${addrHtml}</div>
-<div class="ddate">Kelkheim, ${esc(rechdat) || today}</div>
 
-<div class="dtitle">Rechnung für die Vorsteuerabzugsberechtigung</div>
-
-<table class="dreftbl">
-  <tr><td>Rechnungsnummer:</td><td>${esc(rechnr) || '–'}</td></tr>
-  <tr><td>Rechnungsdatum:</td><td>${esc(rechdat) || '–'}</td></tr>
-  <tr><td>Auftragsnummer:</td><td>${esc(auftnr) || '–'}</td></tr>
-  <tr><td>Auftragsdatum:</td><td>${esc(auftdat) || '–'}</td></tr>
-  <tr><td>Kennzeichen:</td><td>${esc(kz) || '–'}</td></tr>
-  <tr><td>Fahrzeug:</td><td>${esc(fzg) || '–'}</td></tr>
-</table>
-
-<div class="dnotice">
-  <strong>Hinweis:</strong> Der Versicherungsnehmer ist vorsteuerabzugsberechtigt.
+<div class="drow">
+  <div class="drecip-addr">${addrHtml}</div>
+  <div class="ddate">Kelkheim, den ${esc(rechdat) || today}</div>
 </div>
 
-${amtRows ? `
-<table class="damttbl">
-  <thead><tr><th>Position</th><th>Betrag</th></tr></thead>
-  <tbody>${amtRows}</tbody>
-</table>` : ''}
+<div class="dtit-row">
+  <span style="font-weight:bold;text-decoration:underline">Rechnung für die Vorsteuerabzugsberechtigung</span>
+  <span><span style="font-weight:bold;text-decoration:underline">Zur RG-Nr. ${esc(rechnr) || '____'}&nbsp;(</span>Bitte angeben)</span>
+</div>
 
-<div class="dpay-hint">
-  Bitte überweisen Sie den fälligen Betrag auf untenstehendes Konto.<br>
-  Vielen Dank für Ihr Vertrauen – Ihr Autoglas Gürcam Team.
+<div class="dbody">
+  <p>Sehr geehrte Damen und Herren,</p>
+  <p>zunächst bedanken wir uns, dass Sie sich für unsere Werkstatt entschieden haben.<br>
+  folgend listen wir Ihnen die Fahrzeugdaten auf.</p>
+
+  <div class="dveh">
+    <div><span class="vl">KFZ-Kennzeichen:</span><span>${esc(kz) || '–'}</span></div>
+    <div><span class="vl">KFZ -Typ:</span><span>${esc(fzg) || '–'}</span></div>
+    <div><span class="vl">Steuer:</span><span>${esc(mwst) ? esc(mwst) + '€' : '–'}</span></div>
+  </div>
+
+  <p>Anbei unsere Rechnung zum vorgang-NR. ${esc(auftnr) || '–'} / ${esc(auftdat) || '–'}, mit der Rechnung
+  Nr. <strong>${esc(rechnr) || '–'}</strong>. Wir bitten Sie die ausgewiesene MwSt.: in Höhe von
+  <strong>${esc(mwst) ? esc(mwst) + '€' : '–'}</strong> auf unser unten aufgeführtes Konto zu überweisen.</p>
+
+  <p>Ihr AUTOGLAS GÜRCAM-TEAM bedankt sich für Ihren Auftrag und wünscht Ihnen eine gute
+  Fahrt.</p>
+
+  <p style="margin-top:46px">Mit freundlichen Grüßen</p>
+  <p>Autoglas Gürcam</p>
 </div>
 
 <div style="flex:1"></div>
@@ -1009,6 +950,17 @@ async function downloadPDF() {
   page.style.transform    = 'scale(1)';
   page.style.marginBottom = '0';
 
+  // SVG-Logo durch PNG ersetzen – html2canvas rastert SVG-Verläufe unzuverlässig
+  const logoHolder = page.querySelector('.dh-logo');
+  let logoRestore = null;
+  try {
+    const { dataUrl } = await renderLogo();
+    logoRestore = logoHolder.innerHTML;
+    logoHolder.innerHTML = `<img src="${dataUrl}" style="width:205px;display:block" alt="">`;
+    const li = logoHolder.querySelector('img');
+    if (!li.complete) await new Promise(r => { li.onload = r; li.onerror = r; });
+  } catch (e) { /* SVG bleibt als Fallback stehen */ }
+
   try {
     await html2pdf()
       .set({
@@ -1026,6 +978,7 @@ async function downloadPDF() {
     console.error(err);
   }
 
+  if (logoRestore !== null) logoHolder.innerHTML = logoRestore;
   page.style.transform    = savedTransform;
   page.style.marginBottom = savedMarginB;
   hideLoading();
@@ -1041,8 +994,9 @@ async function downloadWord() {
   try {
     const {
       Document, Paragraph, TextRun, Table, TableRow, TableCell,
-      WidthType, BorderStyle, AlignmentType, ShadingType, Packer,
-      convertInchesToTwip, Header, Footer, ImageRun, VerticalAlign
+      WidthType, BorderStyle, AlignmentType, Packer,
+      convertInchesToTwip, Header, Footer, ImageRun, VerticalAlign,
+      TabStopType, Tab
     } = docx;
 
     const logoBuf = await renderLogoPng().catch(() => null);
@@ -1053,20 +1007,12 @@ async function downloadWord() {
     const auftdat = g('f_auftdat');
     const kz      = g('f_kz');
     const fzg     = g('f_fzg');
-    const netto   = g('f_netto');
     const mwst    = g('f_mwst');
-    const brutto  = g('f_brutto');
-    const sb      = g('f_sb');
-    const zahln   = g('f_zahln');
-    const zahlv   = g('f_zahlv');
     const kunde   = g('f_kunde');
     const today   = new Date().toLocaleDateString('de-DE');
 
-    const RED   = 'C8102E';
-    const DARK  = '2C2C2C';
-    const GRAY  = 'F7F7F7';
-    const PINK  = 'FFF3F5';
-    const LGRAY = '555555';
+    const DARK = '2C2C2C';
+    const RED  = 'C8102E';
 
     const NO_BORDER = {
       top:    { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
@@ -1074,72 +1020,14 @@ async function downloadWord() {
       left:   { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
       right:  { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
     };
-    const THIN_BOTTOM = { ...NO_BORDER, bottom: { style: BorderStyle.SINGLE, size: 1, color: 'EEEEEE' } };
-    const cellM = { top: 80, bottom: 80, left: 120, right: 80 };
 
-    // ── ref table rows ──
-    const refData = [
-      ['Rechnungsnummer', rechnr || '–'],
-      ['Rechnungsdatum',  rechdat || '–'],
-      ['Auftragsnummer',  auftnr || '–'],
-      ['Auftragsdatum',   auftdat || '–'],
-      ['Kennzeichen',     kz || '–'],
-      ['Fahrzeug',        fzg || '–'],
-    ];
+    // Rechter Tab-Anschlag = Inhaltsbreite bei A4 mit 2,54-cm-Rändern
+    const TAB_RIGHT = 9026;
 
-    const refRows = refData.map((r, i) => new TableRow({ children: [
-      new TableCell({
-        shading:  i % 2 === 0 ? { fill: GRAY, type: ShadingType.CLEAR, color: GRAY } : undefined,
-        children: [new Paragraph({ children: [new TextRun({ text: r[0], bold: true, size: 20, color: LGRAY })] })],
-        borders: THIN_BOTTOM, margins: cellM, width: { size: 42, type: WidthType.PERCENTAGE }
-      }),
-      new TableCell({
-        shading:  i % 2 === 0 ? { fill: GRAY, type: ShadingType.CLEAR, color: GRAY } : undefined,
-        children: [new Paragraph({ children: [new TextRun({ text: r[1], size: 20 })] })],
-        borders: THIN_BOTTOM, margins: cellM, width: { size: 58, type: WidthType.PERCENTAGE }
-      }),
-    ]}));
-
-    // Betragsaufstellung: nur MwSt.-Gesamtbetrag, SB und Zahlbeträge –
-    // Netto-/Bruttobetrag der Rechnung erscheinen bewusst NICHT im Dokument.
-    const amtData = [];
-    if (sb)     amtData.push(['SB-Anteil (Selbstbeteiligung)',   sb + ' €', false]);
-    if (mwst)   amtData.push(['MwSt.-Gesamtbetrag (19 %)',       mwst + ' €', true]);
-    if (zahln)  amtData.push(['Zahlbetrag Versicherungsnehmer',  zahln + ' €', false]);
-    if (zahlv)  amtData.push(['Zahlbetrag Versicherung',         zahlv + ' €', false]);
-
-    const amtHeaderRow = new TableRow({ children: [
-      new TableCell({
-        shading:  { fill: DARK, type: ShadingType.CLEAR, color: DARK },
-        children: [new Paragraph({ children: [new TextRun({ text: 'Position', bold: true, size: 18, color: 'FFFFFF' })] })],
-        borders:  NO_BORDER, margins: cellM
-      }),
-      new TableCell({
-        shading:  { fill: DARK, type: ShadingType.CLEAR, color: DARK },
-        children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Betrag', bold: true, size: 18, color: 'FFFFFF' })] })],
-        borders:  NO_BORDER, margins: cellM
-      }),
-    ]});
-
-    const amtRows = amtData.map(r => {
-      const isTotal = r[2];
-      const topBdr  = isTotal
-        ? { style: BorderStyle.SINGLE, size: 8, color: RED }
-        : { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
-      const bdrSpec = { ...THIN_BOTTOM, top: topBdr };
-      return new TableRow({ children: [
-        new TableCell({
-          shading:  isTotal ? { fill: PINK, type: ShadingType.CLEAR, color: PINK } : undefined,
-          children: [new Paragraph({ children: [new TextRun({ text: r[0], bold: isTotal, size: 20, color: isTotal ? RED : '333333' })] })],
-          borders: bdrSpec, margins: cellM
-        }),
-        new TableCell({
-          shading:  isTotal ? { fill: PINK, type: ShadingType.CLEAR, color: PINK } : undefined,
-          children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: r[1], bold: isTotal, size: 20, color: isTotal ? RED : '333333' })] })],
-          borders: bdrSpec, margins: cellM
-        }),
-      ]});
-    });
+    // Hilfsfunktionen für Brieftext (11 pt = size 22)
+    const t = (text, opts = {}) => new TextRun({ text, size: 22, ...opts });
+    const tabT = (text, opts = {}) => new TextRun({ children: [new Tab(), text], size: 22, ...opts });
+    const blank = () => new Paragraph({ text: '' });
 
     // ── Address lines ──
     const addrLines = kunde ? kunde.split('\n') : ['–'];
@@ -1155,24 +1043,24 @@ async function downloadWord() {
             new TableCell({
               children: [
                 logoBuf
-                  ? new Paragraph({ children: [new ImageRun({ data: logoBuf, transformation: { width: 200, height: 69 } })] })
+                  ? new Paragraph({ children: [new ImageRun({ data: logoBuf, transformation: { width: 190, height: 90 } })] })
                   : new Paragraph({ children: [new TextRun({ text: 'AUTOGLAS GÜRCAM', bold: true, size: 40, color: RED })] })
               ],
-              borders: { ...NO_BORDER, ...headerLine },
+              borders: NO_BORDER,
               verticalAlign: VerticalAlign.BOTTOM,
-              width: { size: 45, type: WidthType.PERCENTAGE }
+              width: { size: 42, type: WidthType.PERCENTAGE }
             }),
             new TableCell({
               children: [
                 new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Autoglas Gürcam', bold: true, size: 18 })] }),
                 new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Gürce Ali & Toksun Halil GbR', bold: true, size: 18 })] }),
-                new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Industriestraße 11', size: 18 })] }),
+                new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Industrie Straße 11', size: 18 })] }),
                 new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: '65779 Kelkheim (Taunus)', size: 18 })] }),
                 new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Tel.: +49 176 2350 8710   |   E-Mail: info@autoglas-guercam.com', size: 17 })] }),
               ],
               borders: { ...NO_BORDER, ...headerLine },
               verticalAlign: VerticalAlign.BOTTOM,
-              width: { size: 55, type: WidthType.PERCENTAGE }
+              width: { size: 58, type: WidthType.PERCENTAGE }
             }),
           ]})]
         })
@@ -1212,66 +1100,66 @@ async function downloadWord() {
       ]
     });
 
-    // ── Assemble document body ──
+    // ── Brieftext 1:1 nach Vorlage – einziger Betrag ist die MwSt. ──
+    const addrParas = addrLines.map((l, i) =>
+      i === addrLines.length - 1
+        ? new Paragraph({
+            tabStops: [{ type: TabStopType.RIGHT, position: TAB_RIGHT }],
+            children: [t(l || ' '), tabT(`Kelkheim, den ${rechdat || today}`)]
+          })
+        : new Paragraph({ children: [t(l || ' ')] })
+    );
+
     const children = [
       // Absenderzeile (klein, unterstrichen – wie im Original-Briefkopf)
       new Paragraph({
         children: [new TextRun({ text: 'AUTOGLAS GÜRCAM - Industriestraße 11, 65779 Kelkheim', size: 15, underline: {} })],
-        spacing: { after: 220 }
+        spacing: { after: 240 }
       }),
-      ...addrLines.map(l => new Paragraph({ children: [new TextRun({ text: l || ' ', size: 22 })] })),
-      new Paragraph({ text: '', spacing: { after: 180 } }),
-      // Date
+      ...addrParas,
+      blank(), blank(), blank(),
+      // Titelzeile mit Rechnungsbezug rechts
       new Paragraph({
-        alignment: AlignmentType.RIGHT,
-        children:  [new TextRun({ text: `Kelkheim, ${rechdat || today}`, size: 18, color: '888888' })],
-        spacing:   { after: 280 }
+        tabStops: [{ type: TabStopType.RIGHT, position: TAB_RIGHT }],
+        children: [
+          t('Rechnung für die Vorsteuerabzugsberechtigung', { bold: true, underline: {} }),
+          tabT(`Zur RG-Nr. ${rechnr || '____'} (`, { bold: true, underline: {} }),
+          t('Bitte angeben)')
+        ],
+        spacing: { after: 280 }
       }),
-      // Title
-      new Paragraph({
-        children: [new TextRun({ text: 'Rechnung für die Vorsteuerabzugsberechtigung', bold: true, size: 32 })],
-        border:   { bottom: { style: BorderStyle.SINGLE, size: 4, color: 'DDDDDD' } },
-        spacing:  { after: 280 }
-      }),
-      // Ref table
-      new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        borders: NO_BORDER,
-        rows: refRows
-      }),
-      new Paragraph({ text: '', spacing: { after: 200 } }),
-      // Notice box
+      new Paragraph({ children: [t('Sehr geehrte Damen und Herren,')], spacing: { after: 280 } }),
+      new Paragraph({ children: [t('zunächst bedanken wir uns, dass Sie sich für unsere Werkstatt entschieden haben.')] }),
+      new Paragraph({ children: [t('folgend listen wir Ihnen die Fahrzeugdaten auf.')], spacing: { after: 360 } }),
+      // Fahrzeugdaten (fett, per Tabulator ausgerichtet)
+      ...[
+        ['KFZ-Kennzeichen:', kz || '–'],
+        ['KFZ -Typ:', fzg || '–'],
+        ['Steuer:', mwst ? mwst + '€' : '–'],
+      ].map(([label, val]) => new Paragraph({
+        tabStops: [{ type: TabStopType.LEFT, position: 2400 }],
+        children: [t(label, { bold: true }), tabT(val, { bold: true })],
+        spacing: { after: 60 }
+      })),
+      new Paragraph({ text: '', spacing: { after: 160 } }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Hinweis: ', bold: true, size: 20 }),
-          new TextRun({ text: 'Der Versicherungsnehmer ist vorsteuerabzugsberechtigt.', size: 20 })
+          t(`Anbei unsere Rechnung zum vorgang-NR. ${auftnr || '–'} / ${auftdat || '–'}, mit der Rechnung Nr. `),
+          t(rechnr || '–', { bold: true }),
+          t('. Wir bitten Sie die ausgewiesene MwSt.: in Höhe von '),
+          t(mwst ? mwst + '€' : '–', { bold: true }),
+          t(' auf unser unten aufgeführtes Konto zu überweisen.')
         ],
-        border:  { left: { style: BorderStyle.SINGLE, size: 18, color: RED } },
-        shading: { fill: PINK, type: ShadingType.CLEAR, color: PINK },
-        indent:  { left: 280 },
-        spacing: { before: 160, after: 200 }
+        spacing: { after: 320 }
       }),
-      new Paragraph({ text: '', spacing: { after: 120 } }),
-    ];
-
-    // Amounts
-    if (amtRows.length > 0) {
-      children.push(
-        new Table({
-          width:   { size: 100, type: WidthType.PERCENTAGE },
-          borders: NO_BORDER,
-          rows:    [amtHeaderRow, ...amtRows]
-        })
-      );
-    }
-
-    children.push(
-      new Paragraph({ text: '', spacing: { after: 280 } }),
       new Paragraph({
-        children: [new TextRun({ text: 'Bitte überweisen Sie den fälligen Betrag auf untenstehendes Konto. Vielen Dank für Ihr Vertrauen.', size: 20 })],
-        spacing: { after: 200 }
-      })
-    );
+        children: [t('Ihr AUTOGLAS GÜRCAM-TEAM bedankt sich für Ihren Auftrag und wünscht Ihnen eine gute Fahrt.')],
+        spacing: { after: 480 }
+      }),
+      blank(), blank(),
+      new Paragraph({ children: [t('Mit freundlichen Grüßen')], spacing: { after: 280 } }),
+      new Paragraph({ children: [t('Autoglas Gürcam')] }),
+    ];
 
     const doc2 = new Document({
       sections: [{
