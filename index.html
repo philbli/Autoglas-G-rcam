@@ -796,9 +796,14 @@ function parseInvoice(txt, lines, items) {
   set('f_fzg', fzg, 'Fahrzeug');
 
   // ── MwSt (einziger Betrag, der ins Dokument übernommen wird) ──
-  let mwst = lineValue(/MwSt\.?\s*:?\s*19\s*%\s*([\d.,]+)\s*€?/i)
+  // pdf.js liefert Fragmente wie "MwSt .", ":", "19", "%", "176,14", "€" mit
+  // beliebigen Lücken — daher sehr flexible Regex-Kette
+  let mwst = lineValue(/MwSt[\s.]*:?\s*19\s*%\s*([\d.,]+)/i)
+          || lineValue(/MwSt[^€\n]{0,80}([\d]{1,4}[.,]\d{2})\s*€/i)
+          || lineValue(/MwSt[^€\n]{0,80}19[\s%][\s\S]{0,40}?([\d]{1,4}[.,]\d{2})/i)
           || grab([
-               /MwSt\.?\s*:?\s*19\s*%\s*([\d.,]+)\s*€?/i,
+               /MwSt[\s.]*:?\s*19\s*%\s*([\d.,]+)/i,
+               /MwSt[^\n]{0,80}([\d]{1,4}[.,]\d{2})\s*€/i,
                /19\s*%\s+([\d.,]+)\s*€/i,
              ]);
   if (mwst) mwst = mwst.replace(/\s*€\s*/g, '').trim();
