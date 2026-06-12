@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autoglas Gürcam – Vorsteuer-Rechnung Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  --primary:       #C8102E;
+  --primary-dark:  #a50d25;
+  --primary-light: #fde8ec;
+  --anthracite:    #2C2C2C;
+  --anthracite-lt: #4A4A4A;
+  --bg:            #F5F6F8;
+  --white:         #FFFFFF;
+  --border:        #E0E3E8;
+  --text:          #1A1A2E;
+  --text-muted:    #6B7280;
+  --success:       #10B981;
+  --warning:       #F59E0B;
+  --error:         #EF4444;
+  --shadow-sm:     0 1px 4px rgba(0,0,0,0.07);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg:     0 8px 32px rgba(0,0,0,0.14);
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --t: 0.22s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: var(--anthracite);
+  color: white;
+  padding: 0 32px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-left  { display: flex; align-items: center; gap: 12px; }
+.logo-box {
+  width: 36px; height: 36px;
+  background: var(--primary);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px; color: white; letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+.header-title   { font-size: 16px; font-weight: 600; }
+.header-sub     { font-size: 11.5px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+.header-badge {
+  background: rgba(200,16,46,0.15);
+  border: 1px solid rgba(200,16,46,0.3);
+  color: #ff7b8a;
+  font-size: 11px; font-weight: 500;
+  padding: 3px 11px; border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* ===== CONTAINER ===== */
+.container { max-width: 1220px; margin: 0 auto; padding: 28px 24px; }
+
+/* ===== STEPPER ===== */
+.stepper {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin-bottom: 28px;
+}
+.step { display: flex; align-items: center; gap: 9px; }
+.step-circle {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 2px solid var(--border); background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: var(--text-muted);
+  flex-shrink: 0; transition: all var(--t);
+}
+.step-label {
+  font-size: 13px; font-weight: 500; color: var(--text-muted);
+  transition: color var(--t); white-space: nowrap;
+}
+.step-line {
+  flex: 1; max-width: 70px; height: 2px;
+  background: var(--border); margin: 0 14px;
+  transition: background var(--t);
+}
+.step.active .step-circle { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+.step.active .step-label  { color: var(--primary); font-weight: 600; }
+.step.done  .step-circle  { border-color: var(--success); background: var(--success); color: white; }
+.step.done  .step-label   { color: var(--success); }
+.step-line.done            { background: var(--success); }
+
+/* ===== UPLOAD SECTION ===== */
+.upload-section {
+  background: var(--white);
+  border-radius: var(--r-lg);
+  padding: 36px;
+  box-shadow: var(--shadow-sm);
+}
+.drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--r-md);
+  padding: 64px 40px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--bg);
+  transition: all var(--t);
+  user-select: none;
+}
+.drop-zone:hover, .drop-zone.dragover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.drop-zone.dragover { transform: scale(1.012); }
+.drop-icon {
+  width: 68px; height: 68px; margin: 0 auto 16px;
+  opacity: 0.55; transition: opacity var(--t);
+}
+.drop-zone:hover .drop-icon { opacity: 0.85; }
+.drop-title { font-size: 19px; font-weight: 600; margin-bottom: 7px; }
+.drop-hint  { font-size: 14px; color: var(--text-muted); margin-bottom: 22px; }
+.btn-upload {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--primary); color: white;
+  border: none; padding: 10px 24px;
+  border-radius: var(--r-sm); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: background var(--t); font-family: var(--font);
+}
+.btn-upload:hover { background: var(--primary-dark); }
+#fileInput { display: none; }
+
+/* ===== LOADING OVERLAY ===== */
+.loading-overlay {
+  display: none; position: fixed;
+  inset: 0; background: rgba(0,0,0,0.45);
+  z-index: 9000; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+}
+.loading-overlay.show { display: flex; }
+.spinner {
+  width: 46px; height: 46px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { color: white; font-size: 16px; font-weight: 500; }
+
+/* ===== TOASTS ===== */
+.toast-wrap {
+  position: fixed; bottom: 24px; right: 24px;
+  z-index: 9999; display: flex; flex-direction: column; gap: 10px;
+}
+.toast {
+  background: var(--anthracite); color: white;
+  padding: 12px 18px; border-radius: var(--r-sm);
+  font-size: 14px; display: flex; align-items: flex-start; gap: 10px;
+  box-shadow: var(--shadow-lg); max-width: 380px;
+  animation: tIn 0.3s ease, tOut 0.35s ease 3.65s forwards;
+}
+.toast.success { border-left: 4px solid var(--success); }
+.toast.error   { border-left: 4px solid var(--error); }
+.toast.warning { border-left: 4px solid var(--warning); }
+.toast-icon    { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+@keyframes tIn  { from { transform: translateX(110%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes tOut { from { opacity: 1; } to { opacity: 0; transform: translateX(110%); } }
+
+/* ===== MAIN CONTENT (2-col) ===== */
+.main-content {
+  display: none; gap: 24px;
+  animation: fadeUp 0.38s ease;
+}
+.main-content.show { display: grid; grid-template-columns: 480px 1fr; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ===== PANEL ===== */
+.panel { background: var(--white); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+.panel-head {
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.panel-head-icon {
+  width: 30px; height: 30px;
+  background: var(--primary-light); border-radius: 7px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.panel-title { font-size: 14.5px; font-weight: 600; }
+.panel-body  { padding: 22px; }
+
+/* ===== FORM ===== */
+.fsec { margin-bottom: 22px; }
+.fsec-title {
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.09em;
+  color: var(--text-muted); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.fsec-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.fg { margin-bottom: 12px; }
+.fg label {
+  display: block; font-size: 11.5px; font-weight: 500;
+  color: var(--text-muted); margin-bottom: 4px;
+}
+.fc {
+  width: 100%; padding: 8px 11px;
+  border: 1.5px solid var(--border); border-radius: var(--r-sm);
+  font-size: 13.5px; font-family: var(--font); color: var(--text);
+  background: var(--white); outline: none; transition: all var(--t);
+}
+.fc:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(200,16,46,0.1); }
+textarea.fc { resize: vertical; min-height: 76px; }
+.fc.found   { border-color: var(--success); background: #f0fdf4; animation: hlGreen 1.2s ease; }
+.fc.missing { border-color: var(--warning); background: #fffbeb; }
+@keyframes hlGreen { 0% { background: #bbf7d0; } 100% { background: #f0fdf4; } }
+
+/* ===== PREVIEW PANEL ===== */
+.preview-panel {
+  position: sticky; top: 82px;
+  max-height: calc(100vh - 106px);
+  overflow-y: auto;
+}
+.preview-outer {
+  background: #d8d8d8;
+  padding: 20px;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  display: flex; justify-content: center; align-items: flex-start;
+}
+
+/* ===== A4 DOCUMENT ===== */
+.a4 {
+  width: 794px;
+  min-height: 1123px;
+  background: white;
+  box-shadow: 0 3px 30px rgba(0,0,0,0.22);
+  padding: 58px 68px 50px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10.5pt;
+  color: #1a1a1a;
+  transform-origin: top left;
+}
+.a4 .dh {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 18px; margin-bottom: 24px;
+  border-bottom: 3px solid #C8102E;
+}
+.a4 .dh-left {}
+.a4 .dco { font-size: 19pt; font-weight: 700; color: #C8102E; margin-bottom: 3px; }
+.a4 .dcs { font-size: 8.5pt; color: #555; line-height: 1.7; }
+.a4 .dlogo {
+  width: 72px; height: 72px;
+  background: #C8102E; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 22pt; font-weight: 700; flex-shrink: 0;
+}
+.a4 .drecip-lbl { font-size: 7.5pt; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+.a4 .drecip-addr { font-size: 10.5pt; line-height: 1.65; }
+.a4 .ddate { text-align: right; font-size: 8.5pt; color: #888; margin: 10px 0 0; }
+.a4 .dtitle {
+  font-size: 15pt; font-weight: 700; color: #1a1a1a;
+  margin: 26px 0 18px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #ddd;
+}
+.a4 .dreftbl { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 9.5pt; }
+.a4 .dreftbl td { padding: 5px 9px; vertical-align: top; }
+.a4 .dreftbl td:first-child { font-weight: 600; color: #555; width: 42%; white-space: nowrap; }
+.a4 .dreftbl tr:nth-child(odd) td { background: #f7f7f7; }
+.a4 .dnotice {
+  background: #FFF3F5; border-left: 4px solid #C8102E;
+  padding: 11px 15px; margin: 18px 0; border-radius: 0 4px 4px 0;
+  font-size: 10pt;
+}
+.a4 .damttbl { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 10pt; }
+.a4 .damttbl th {
+  background: #2C2C2C; color: white;
+  padding: 7px 11px; text-align: left; font-size: 8.5pt; font-weight: 600;
+}
+.a4 .damttbl th:last-child { text-align: right; }
+.a4 .damttbl td { padding: 7px 11px; border-bottom: 1px solid #eee; }
+.a4 .damttbl td:last-child { text-align: right; font-weight: 500; }
+.a4 .damttbl .row-total td {
+  background: #FFF3F5; font-weight: 700; color: #C8102E;
+  border-top: 2px solid #C8102E; border-bottom: none;
+}
+.a4 .dpay-hint { font-size: 9.5pt; color: #444; margin: 20px 0 28px; line-height: 1.75; }
+.a4 .dfoot {
+  padding-top: 18px; border-top: 1px solid #ddd;
+  font-size: 7.5pt; color: #777; line-height: 1.85;
+}
+.a4 .dfoot-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.a4 .dfoot-lbl { font-weight: 600; color: #444; font-size: 7.5pt; }
+
+/* ===== DOWNLOAD BAR ===== */
+.dl-bar {
+  display: none; background: var(--white);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-sm);
+  padding: 22px 26px; margin-top: 22px;
+  animation: fadeUp 0.38s ease;
+}
+.dl-bar.show { display: block; }
+.dl-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+.dl-btns  { display: flex; gap: 11px; flex-wrap: wrap; align-items: center; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 21px; border-radius: var(--r-sm);
+  font-size: 13.5px; font-weight: 600; cursor: pointer;
+  border: none; transition: all var(--t); font-family: var(--font);
+}
+.btn-pdf  { background: var(--primary); color: white; }
+.btn-pdf:hover  { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-word { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+.btn-word:hover { background: var(--border); }
+.btn-reset { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
+.btn-reset:hover { color: var(--error); border-color: var(--error); }
+.btn:active { transform: scale(0.97); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1000px) {
+  .main-content.show { grid-template-columns: 1fr; }
+  .preview-panel { position: static; max-height: none; }
+}
+@media (max-width: 600px) {
+  .header { padding: 0 16px; }
+  .header-badge { display: none; }
+  .upload-section { padding: 22px 16px; }
+  .drop-zone { padding: 40px 20px; }
+  .stepper .step-line { max-width: 40px; margin: 0 8px; }
+  .dl-btns { flex-direction: column; align-items: stretch; }
+  .container { padding: 20px 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-box">AG</div>
+    <div>
+      <div class="header-title">Autoglas Gürcam</div>
+      <div class="header-sub">Vorsteuer-Rechnung Generator</div>
+    </div>
+  </div>
+  <div class="header-badge">Offline – keine Daten verlassen den Browser</div>
+</header>
+
+<!-- MAIN -->
+<main class="container">
+
+  <!-- STEPPER -->
+  <div class="stepper">
+    <div class="step active" id="step1">
+      <div class="step-circle">1</div>
+      <span class="step-label">PDF hochladen</span>
+    </div>
+    <div class="step-line" id="line1"></div>
+    <div class="step" id="step2">
+      <div class="step-circle">2</div>
+      <span class="step-label">Daten prüfen</span>
+    </div>
+    <div class="step-line" id="line2"></div>
+    <div class="step" id="step3">
+      <div class="step-circle">3</div>
+      <span class="step-label">Dokument herunterladen</span>
+    </div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div class="upload-section" id="uploadSection">
+    <div class="drop-zone" id="dropZone">
+      <svg class="drop-icon" viewBox="0 0 72 72" fill="none">
+        <rect width="72" height="72" rx="14" fill="#C8102E" fill-opacity="0.12"/>
+        <path d="M36 14 L50 28 H42 V46 H30 V28 H22 Z" fill="#C8102E"/>
+        <rect x="18" y="50" width="36" height="7" rx="2" fill="#C8102E" opacity="0.45"/>
+      </svg>
+      <div class="drop-title">Werkstatt-Rechnung (PDF) hochladen</div>
+      <div class="drop-hint">Datei hierher ziehen oder per Klick auswählen</div>
+      <button class="btn-upload" type="button" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        PDF auswählen
+      </button>
+      <input type="file" id="fileInput" accept=".pdf,application/pdf">
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content" id="mainContent">
+
+    <!-- LEFT: FORM -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-head-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="panel-title">Ausgelesene Daten prüfen &amp; bearbeiten</div>
+      </div>
+      <div class="panel-body">
+
+        <div class="fsec">
+          <div class="fsec-title">Kundendaten</div>
+          <div class="fg">
+            <label for="f_kunde">Kundenanschrift (Name, Straße, PLZ/Ort)</label>
+            <textarea class="fc" id="f_kunde" rows="3" placeholder="Firmenname GmbH&#10;Musterstraße 1&#10;12345 Musterstadt" oninput="updatePreview()"></textarea>
+          </div>
+        </div>
+
+        <div class="fsec">
+          <div class="fsec-title">Rechnungsbezug</div>
+          <div class="fg">
+            <label for="f_rechnr">Rechnungsnummer</label>
+            <input class="fc" id="f_rechnr" type="text" placeholder="R-0000" oninput="updatePreview()">
+          </div>
+          <div class="fg">
+            <label for="f_rechdat">Rechnungsdatum</label>
+            <input class="fc" id="f_rechdat" type="text" placeholder="TT.MM.JJJJ" oninput="updatePreview()">
+          </div>
+          <div class="fg">
+            <label for="f_auftnr">Auftragsnummer</label>
+            <input class="fc" id="f_auftnr" type="text" placeholder="A-0000" oninput="updatePreview()">
+          </div>
+          <div class="fg">
+            <label for="f_auftdat">Auftragsdatum</label>
+            <input class="fc" id="f_auftdat" type="text" placeholder="TT.MM.JJJJ" oninput="updatePreview()">
+          </div>
+          <div class="fg">
+            <label for="f_kz">Kennzeichen</label>
+            <input class="fc" id="f_kz" type="text" placeholder="AB-CD 1234" oninput="updatePreview()">
+          </div>
+          <div class="fg">
+            <label for="f_fzg">Fahrzeug / KFZ-Typ</label>
+            <input class="fc" id="f_fzg" type="text" placeholder="Hersteller Modell" oninput="updatePreview()">
+          </div>
+        </div>
+
+        <div class="fsec">
+          <div class="fsec-title">Beträge (€)</div>
+          <div class="fg">
+            <label for="f_netto">Nettobetrag</label>
+            <input class="fc" id="f_netto" type="text" placeholder="0,00" oninput="updatePreview()">
+          </div>
+          <div class="fg">
+            <label for="f_mwst">MwSt. 19&nbsp;%</label>
+            <input class="fc" id="f_mwst" type="text" placeholder="0,00" oninput="updatePreview()">
+          </div>
+          <div class="fg">
+            <label for="f_brutto">Rechnungsbetrag (brutto)</label>
+            <input class="fc" id="f_brutto" type="text" placeholder="0,00" oninput="updatePreview()">
+          </div>
+          <div class="fg">
+            <label for="f_sb">SB-Anteil / Selbstbeteiligung</label>
+            <input class="fc" id="f_sb" type="text" placeholder="0,00" oninput="updatePreview()">
+          </div>
+          <div class="fg">
+            <label for="f_zahln">Zahlbetrag Versicherungsnehmer</label>
+            <input class="fc" id="f_zahln" type="text" placeholder="0,00" oninput="updatePreview()">
+          </div>
+          <div class="fg">
+            <label for="f_zahlv">Zahlbetrag Versicherung</label>
+            <input class="fc" id="f_zahlv" type="text" placeholder="0,00" oninput="updatePreview()">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: PREVIEW -->
+    <div class="preview-panel">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-head-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="panel-title">Dokumentvorschau</div>
+        </div>
+        <div class="preview-outer" id="previewOuter">
+          <div class="a4" id="a4Page"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+
+  <!-- DOWNLOAD BAR -->
+  <div class="dl-bar" id="dlBar">
+    <div class="dl-title">Schritt 3 – Dokument herunterladen</div>
+    <div class="dl-btns">
+      <button class="btn btn-pdf" onclick="downloadPDF()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="17" x2="12" y2="11"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+        Als PDF herunterladen
+      </button>
+      <button class="btn btn-word" onclick="downloadWord()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+        Als Word herunterladen (.docx)
+      </button>
+      <button class="btn btn-reset" onclick="resetApp()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.99"/></svg>
+        Neue Rechnung
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">PDF wird ausgelesen…</div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ============================================================
+     LIBRARIES (CDN)
+     ============================================================ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const FORM_IDS = ['f_kunde','f_rechnr','f_rechdat','f_auftnr','f_auftdat',
+                   'f_kz','f_fzg','f_netto','f_mwst','f_brutto','f_sb','f_zahln','f_zahlv'];
+
+/* ============================================================
+   DRAG & DROP / FILE INPUT
+   ============================================================ */
+const dropZone  = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('dragenter', e => e.preventDefault());
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type === 'application/pdf') handleFile(f);
+  else toast('Bitte eine PDF-Datei hochladen.', 'error');
+});
+dropZone.addEventListener('click', e => {
+  if (e.target.tagName !== 'BUTTON') fileInput.click();
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+/* ============================================================
+   PDF PROCESSING
+   ============================================================ */
+async function handleFile(file) {
+  showLoading('PDF wird ausgelesen…');
+  try {
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+
+    let items = [];
+    for (let p = 1; p <= pdf.numPages; p++) {
+      const page     = await pdf.getPage(p);
+      const tc       = await page.getTextContent();
+      const viewport = page.getViewport({ scale: 1 });
+      tc.items.forEach(it => {
+        const s = it.str;
+        if (s && s.trim()) {
+          items.push({
+            str:  s,
+            x:    it.transform[4],
+            y:    viewport.height - it.transform[5],
+            page: p
+          });
+        }
+      });
+    }
+
+    // Sort: page → y-band (5px tolerance) → x
+    items.sort((a, b) => {
+      if (a.page !== b.page) return a.page - b.page;
+      const dy = a.y - b.y;
+      if (Math.abs(dy) > 5) return dy;
+      return a.x - b.x;
+    });
+
+    const fullText = items.map(i => i.str).join(' ');
+    const lines    = buildLines(items);
+
+    hideLoading();
+    parseInvoice(fullText, lines, items);
+    showMain();
+  } catch (err) {
+    hideLoading();
+    toast('Fehler beim PDF-Lesen: ' + err.message, 'error');
+    console.error(err);
+  }
+}
+
+function buildLines(items) {
+  const map = new Map();
+  items.forEach(it => {
+    const k = Math.round(it.y / 4) * 4;
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(it);
+  });
+  return [...map.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([, its]) => its.sort((a, b) => a.x - b.x).map(i => i.str).join(' '));
+}
+
+/* ============================================================
+   PARSING
+   ============================================================ */
+function parseInvoice(txt, lines, items) {
+  const found   = {};
+  const missing = [];
+
+  function grab(patterns, clean) {
+    for (const re of patterns) {
+      const m = txt.match(re);
+      if (m && m[1]) {
+        const v = m[1].trim();
+        return clean ? clean(v) : v;
+      }
+    }
+    return null;
+  }
+
+  function set(id, val, label) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('found', 'missing');
+    if (val && val.trim()) {
+      el.value = val.trim();
+      el.classList.add('found');
+      found[id] = true;
+      setTimeout(() => el.classList.remove('found'), 2200);
+    } else {
+      el.value = '';
+      el.classList.add('missing');
+      missing.push(label);
+    }
+  }
+
+  const cleanAmt = v => v.replace(/\s*€\s*/g, '').trim();
+
+  // ── Rechnungsnummer ──────────────────────────────────────
+  let rechnr = grab([
+    /Rechnung\s*Nr\.?\s*:?\s*(R-\d{3,6})/i,
+    /Rechnung[^\n]{0,20}:\s*(R-\d{3,6})/i,
+    /\b(R-\d{3,6})\b/,
+  ]);
+  set('f_rechnr', rechnr, 'Rechnungsnummer');
+
+  // ── Rechnungsdatum ───────────────────────────────────────
+  let rechdat = grab([
+    /Rechnungs-?Datum\s*:?\s*(\d{1,2}\.\d{1,2}\.\d{4})/i,
+  ]);
+  set('f_rechdat', rechdat, 'Rechnungsdatum');
+
+  // ── Vorgangs-Nr / Auftragsdatum ──────────────────────────
+  const vorgM = txt.match(/Vorgangs-?Nr[^:]{0,10}:?\s*([A-Z]-\d{3,6})\s*[\/|\\]\s*(\d{1,2}\.\d{1,2}\.\d{4})/i);
+  if (vorgM) {
+    set('f_auftnr',  vorgM[1], 'Auftragsnummer');
+    set('f_auftdat', vorgM[2], 'Auftragsdatum');
+  } else {
+    const an = grab([/\b(A-\d{3,6})\b/]);
+    set('f_auftnr', an, 'Auftragsnummer');
+    set('f_auftdat', null, 'Auftragsdatum');
+  }
+
+  // ── Kennzeichen ──────────────────────────────────────────
+  let kz = grab([
+    /Kennzeichen\s*:?\s*([A-ZÄÖÜ]{1,3}-[A-ZÄÖÜ]{1,2}\s*\d{1,4}[HE]?(?:\s[A-Z])?)/i,
+    /Kennzeichen\s*:?\s*([^\n\r,;]{2,20}?)(?:\s{3,}|Fahrgestell|Fahrzeug|$)/i,
+  ]);
+  if (kz) kz = kz.replace(/\s+/g, ' ').trim();
+  set('f_kz', kz, 'Kennzeichen');
+
+  // ── Fahrzeug ─────────────────────────────────────────────
+  let fzg = grab([
+    /Fahrzeug\s*:?\s*(.+?)(?=\s{3,}|Rechnung\s*Nr|Rechnungs-?Datum|\n\n)/i,
+    /Fahrzeug\s*:?\s*([^\n\r]{5,80})/i,
+  ]);
+  if (fzg) fzg = fzg.trim();
+  set('f_fzg', fzg, 'Fahrzeug');
+
+  // ── Nettobetrag ──────────────────────────────────────────
+  let netto = grab([/Nettobetrag\s*:?\s*([\d.,]+)\s*€?/i], cleanAmt);
+  set('f_netto', netto, 'Nettobetrag');
+
+  // ── MwSt ─────────────────────────────────────────────────
+  let mwst = grab([
+    /MwSt\.?\s*:?\s*19\s*%\s*([\d.,]+)\s*€?/i,
+    /19\s*%\s+([\d.,]+)\s*€/i,
+  ], cleanAmt);
+  set('f_mwst', mwst, 'MwSt.-Betrag');
+
+  // ── Rechnungsbetrag (brutto) ──────────────────────────────
+  let brutto = grab([/Rechnungsbetrag\s*:?\s*([\d.,]+)\s*€?/i], cleanAmt);
+  set('f_brutto', brutto, 'Rechnungsbetrag');
+
+  // ── SB-Anteil ────────────────────────────────────────────
+  let sb = grab([
+    /SB[\s-]?Anteil\s*:?\s*([\d.,]+)\s*€?/i,
+    /Selbstbeteiligungs?\s*:?\s*([\d.,]+)\s*€?/i,
+  ], cleanAmt);
+  set('f_sb', sb, 'SB-Anteil');
+
+  // ── Zahlbetrag VN ────────────────────────────────────────
+  let zahln = grab([
+    /Zahlbetrag\s+Versicherungsnehmer\s*:?\s*([\d.,]+)\s*€?/i,
+    /Versicherungsnehmer\s*:?\s*([\d.,]+)\s*€/i,
+  ], cleanAmt);
+  set('f_zahln', zahln, 'Zahlbetrag VN');
+
+  // ── Zahlbetrag Versicherung ──────────────────────────────
+  let zahlv = grab([
+    /Zahlbetrag\s+Versicherung\b[^n][^e][^h]*?:?\s*([\d.,]+)\s*€?/i,
+    /(?<![Nn]ehmer\s)Versicherung\s*:?\s*([\d.,]+)\s*€/i,
+  ], cleanAmt);
+  set('f_zahlv', zahlv, 'Zahlbetrag Versicherung');
+
+  // ── Kundenanschrift ──────────────────────────────────────
+  const kunde = parseAddress(txt, lines);
+  set('f_kunde', kunde, 'Kundenanschrift');
+
+  // ── Feedback ─────────────────────────────────────────────
+  const nF = Object.keys(found).length;
+  const nM = missing.length;
+  if (nM === 0) {
+    toast(`Alle ${nF} Felder erfolgreich ausgelesen!`, 'success');
+  } else if (nF > 0) {
+    toast(`${nF} Felder ausgelesen – nicht gefunden: ${missing.join(', ')}`, 'warning');
+  } else {
+    toast('Keine Daten erkannt. Bitte Felder manuell ausfüllen.', 'error');
+  }
+
+  updatePreview();
+}
+
+function parseAddress(txt, lines) {
+  // Strategy 1: find "Kunden-Nr" line, look at preceding lines
+  const kundenIdx = lines.findIndex(l => /Kunden-?Nr/i.test(l));
+  if (kundenIdx > 0) {
+    const candidates = [];
+    for (let i = Math.max(0, kundenIdx - 6); i < kundenIdx; i++) {
+      const l = lines[i].trim();
+      if (!l) continue;
+      // Skip sender/header lines
+      if (/^(Autoglas|Gürce|Gürce|Industriestr|65779|Tel\.|info@|Werkstatt|Rech|Vorgang|Kenn|Fahr|Kunden|MwSt|Netto|Brutto)/i.test(l)) continue;
+      if (l.length > 3) candidates.push(l);
+    }
+    if (candidates.length >= 1) return candidates.join('\n');
+  }
+
+  // Strategy 2: regex for PLZ block that is NOT the sender
+  const blocks = [];
+  const re = /([A-ZÄÖÜ][^\n\r]{2,50})\s+([^\n\r]{3,50})\s+(\d{5}\s+[A-ZÄÖÜ][^\n\r]{2,40})/g;
+  let m;
+  while ((m = re.exec(txt)) !== null) {
+    const block = `${m[1].trim()}\n${m[2].trim()}\n${m[3].trim()}`;
+    if (!/Industriestraße 11|65779 Kelkheim/i.test(block)) {
+      blocks.push(block);
+    }
+  }
+  if (blocks.length) return blocks[0];
+
+  return null;
+}
+
+/* ============================================================
+   PREVIEW
+   ============================================================ */
+function g(id)   { return (document.getElementById(id)?.value || '').trim(); }
+function esc(s)  {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function updatePreview() {
+  const kunde   = g('f_kunde');
+  const rechnr  = g('f_rechnr');
+  const rechdat = g('f_rechdat');
+  const auftnr  = g('f_auftnr');
+  const auftdat = g('f_auftdat');
+  const kz      = g('f_kz');
+  const fzg     = g('f_fzg');
+  const netto   = g('f_netto');
+  const mwst    = g('f_mwst');
+  const brutto  = g('f_brutto');
+  const sb      = g('f_sb');
+  const zahln   = g('f_zahln');
+  const zahlv   = g('f_zahlv');
+  const today   = new Date().toLocaleDateString('de-DE');
+
+  const addrHtml = kunde
+    ? kunde.split('\n').map(l => `<div>${esc(l)}</div>`).join('')
+    : '<span style="color:#ccc;font-style:italic">Kundenanschrift</span>';
+
+  // Amount rows
+  let amtRows = '';
+  const addRow = (label, val, cls) => {
+    if (val) amtRows += `<tr${cls?' class="'+cls+'"':''}><td>${label}</td><td>${esc(val)}&thinsp;€</td></tr>`;
+  };
+  addRow('SB-Anteil (Selbstbeteiligung)', sb);
+  addRow('Mehrwertsteuer 19&nbsp;%', mwst);
+  if (zahln) amtRows += `<tr><td><strong>Zahlbetrag Versicherungsnehmer</strong></td><td><strong>${esc(zahln)}&thinsp;€</strong></td></tr>`;
+  addRow('Zahlbetrag Versicherung', zahlv);
+  addRow('Nettobetrag', netto);
+  if (brutto) amtRows += `<tr class="row-total"><td>Rechnungsbetrag gesamt (brutto)</td><td>${esc(brutto)}&thinsp;€</td></tr>`;
+
+  document.getElementById('a4Page').innerHTML = `
+<div class="dh">
+  <div class="dh-left">
+    <div class="dco">Autoglas Gürcam</div>
+    <div class="dcs">
+      Gürce Ali &amp; Toksun Halil GbR<br>
+      Industriestraße 11 &middot; 65779 Kelkheim (Taunus)<br>
+      Tel. +49&nbsp;176&nbsp;2350&nbsp;8710 &middot; info@autoglas-guercam.com
+    </div>
+  </div>
+  <div class="dlogo">AG</div>
+</div>
+
+<div class="drecip-lbl">An</div>
+<div class="drecip-addr">${addrHtml}</div>
+<div class="ddate">Kelkheim, ${esc(rechdat) || today}</div>
+
+<div class="dtitle">Rechnung für die Vorsteuerabzugsberechtigung</div>
+
+<table class="dreftbl">
+  <tr><td>Rechnungsnummer:</td><td>${esc(rechnr) || '–'}</td></tr>
+  <tr><td>Rechnungsdatum:</td><td>${esc(rechdat) || '–'}</td></tr>
+  <tr><td>Auftragsnummer:</td><td>${esc(auftnr) || '–'}</td></tr>
+  <tr><td>Auftragsdatum:</td><td>${esc(auftdat) || '–'}</td></tr>
+  <tr><td>Kennzeichen:</td><td>${esc(kz) || '–'}</td></tr>
+  <tr><td>Fahrzeug:</td><td>${esc(fzg) || '–'}</td></tr>
+</table>
+
+<div class="dnotice">
+  <strong>Hinweis:</strong> Der Versicherungsnehmer ist vorsteuerabzugsberechtigt.
+</div>
+
+${amtRows ? `
+<table class="damttbl">
+  <thead><tr><th>Position</th><th>Betrag</th></tr></thead>
+  <tbody>${amtRows}</tbody>
+</table>` : ''}
+
+<div class="dpay-hint">
+  Bitte überweisen Sie den fälligen Betrag auf untenstehendes Konto.<br>
+  Vielen Dank für Ihr Vertrauen – Ihr Autoglas Gürcam Team.
+</div>
+
+<div style="flex:1"></div>
+<div class="dfoot">
+  <div class="dfoot-grid">
+    <div>
+      <div class="dfoot-lbl">Bankverbindung</div>
+      TAUNUS-SPARKASSE<br>
+      IBAN: DE84 5125 0000 0002 2337 97<br>
+      BIC: HELADEF1TSK
+    </div>
+    <div>
+      <div class="dfoot-lbl">Steuerdaten</div>
+      USt.IdNr.: DE357801660<br>
+      Betriebs-Nr.: 4306236
+    </div>
+    <div>
+      <div class="dfoot-lbl">Kontakt</div>
+      Tel. +49 176 2350 8710<br>
+      info@autoglas-guercam.com
+    </div>
+  </div>
+</div>`;
+
+  scaleA4();
+}
+
+/* ============================================================
+   A4 SCALING
+   ============================================================ */
+function scaleA4() {
+  const outer = document.getElementById('previewOuter');
+  const page  = document.getElementById('a4Page');
+  if (!outer || !page) return;
+  const avail = outer.clientWidth - 40;   // 20px padding each side
+  const scale = Math.min(1, avail / 794);
+  page.style.transform = `scale(${scale})`;
+  // Collapse extra space caused by transform
+  const pageH = page.offsetHeight;
+  outer.style.minHeight = (pageH * scale + 40) + 'px';
+  // negative bottom margin to close the gap
+  page.style.marginBottom = `-${pageH * (1 - scale)}px`;
+}
+window.addEventListener('resize', scaleA4);
+
+/* ============================================================
+   UI STATE
+   ============================================================ */
+function showMain() {
+  document.getElementById('uploadSection').style.display = 'none';
+  document.getElementById('mainContent').classList.add('show');
+  document.getElementById('dlBar').classList.add('show');
+  setStep(2);
+  setTimeout(scaleA4, 50);
+}
+
+function resetApp() {
+  document.getElementById('uploadSection').style.display = 'block';
+  document.getElementById('mainContent').classList.remove('show');
+  document.getElementById('dlBar').classList.remove('show');
+  fileInput.value = '';
+  FORM_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('found', 'missing'); }
+  });
+  setStep(1);
+  updatePreview();
+}
+
+function setStep(n) {
+  for (let i = 1; i <= 3; i++) {
+    const s = document.getElementById('step' + i);
+    s.classList.remove('active', 'done');
+    if (i < n)      s.classList.add('done');
+    else if (i === n) s.classList.add('active');
+  }
+  for (let i = 1; i <= 2; i++) {
+    document.getElementById('line' + i).classList.toggle('done', i < n);
+  }
+  if (n > 3) document.getElementById('step3').classList.add('done');
+}
+
+/* ============================================================
+   LOADING / TOAST
+   ============================================================ */
+function showLoading(msg) {
+  document.getElementById('loadingText').textContent = msg || 'Wird verarbeitet…';
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+
+function toast(msg, type = 'success') {
+  const icons = { success: '✓', error: '✕', warning: '⚠' };
+  const c = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span class="toast-icon">${icons[type] || '•'}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => { if (t.parentNode) t.remove(); }, 4200);
+}
+
+/* ============================================================
+   PDF EXPORT
+   ============================================================ */
+async function downloadPDF() {
+  setStep(3);
+  showLoading('PDF wird erstellt…');
+
+  const page  = document.getElementById('a4Page');
+  const rechnr = g('f_rechnr') || 'export';
+
+  // Temporarily remove transform for clean capture
+  const savedTransform = page.style.transform;
+  const savedMarginB   = page.style.marginBottom;
+  page.style.transform    = 'scale(1)';
+  page.style.marginBottom = '0';
+
+  try {
+    await html2pdf()
+      .set({
+        margin:      0,
+        filename:    `Vorsteuer-Rechnung_${rechnr}.pdf`,
+        image:       { type: 'jpeg', quality: 0.97 },
+        html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      })
+      .from(page)
+      .save();
+    toast('PDF erfolgreich heruntergeladen!', 'success');
+  } catch (err) {
+    toast('Fehler beim PDF-Export: ' + err.message, 'error');
+    console.error(err);
+  }
+
+  page.style.transform    = savedTransform;
+  page.style.marginBottom = savedMarginB;
+  hideLoading();
+}
+
+/* ============================================================
+   WORD EXPORT
+   ============================================================ */
+async function downloadWord() {
+  setStep(3);
+  showLoading('Word-Dokument wird erstellt…');
+
+  try {
+    const {
+      Document, Paragraph, TextRun, Table, TableRow, TableCell,
+      WidthType, BorderStyle, AlignmentType, ShadingType, Packer,
+      convertInchesToTwip
+    } = docx;
+
+    const rechnr  = g('f_rechnr');
+    const rechdat = g('f_rechdat');
+    const auftnr  = g('f_auftnr');
+    const auftdat = g('f_auftdat');
+    const kz      = g('f_kz');
+    const fzg     = g('f_fzg');
+    const netto   = g('f_netto');
+    const mwst    = g('f_mwst');
+    const brutto  = g('f_brutto');
+    const sb      = g('f_sb');
+    const zahln   = g('f_zahln');
+    const zahlv   = g('f_zahlv');
+    const kunde   = g('f_kunde');
+    const today   = new Date().toLocaleDateString('de-DE');
+
+    const RED   = 'C8102E';
+    const DARK  = '2C2C2C';
+    const GRAY  = 'F7F7F7';
+    const PINK  = 'FFF3F5';
+    const LGRAY = '555555';
+
+    const NO_BORDER = {
+      top:    { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+      bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+      left:   { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+      right:  { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
+    };
+    const THIN_BOTTOM = { ...NO_BORDER, bottom: { style: BorderStyle.SINGLE, size: 1, color: 'EEEEEE' } };
+    const cellM = { top: 80, bottom: 80, left: 120, right: 80 };
+
+    // ── ref table rows ──
+    const refData = [
+      ['Rechnungsnummer', rechnr || '–'],
+      ['Rechnungsdatum',  rechdat || '–'],
+      ['Auftragsnummer',  auftnr || '–'],
+      ['Auftragsdatum',   auftdat || '–'],
+      ['Kennzeichen',     kz || '–'],
+      ['Fahrzeug',        fzg || '–'],
+    ];
+
+    const refRows = refData.map((r, i) => new TableRow({ children: [
+      new TableCell({
+        shading:  i % 2 === 0 ? { fill: GRAY, type: ShadingType.CLEAR, color: GRAY } : undefined,
+        children: [new Paragraph({ children: [new TextRun({ text: r[0], bold: true, size: 20, color: LGRAY })] })],
+        borders: THIN_BOTTOM, margins: cellM, width: { size: 42, type: WidthType.PERCENTAGE }
+      }),
+      new TableCell({
+        shading:  i % 2 === 0 ? { fill: GRAY, type: ShadingType.CLEAR, color: GRAY } : undefined,
+        children: [new Paragraph({ children: [new TextRun({ text: r[1], size: 20 })] })],
+        borders: THIN_BOTTOM, margins: cellM, width: { size: 58, type: WidthType.PERCENTAGE }
+      }),
+    ]}));
+
+    // ── amount table rows ──
+    const amtData = [];
+    if (sb)     amtData.push(['SB-Anteil (Selbstbeteiligung)', sb + ' €', false]);
+    if (mwst)   amtData.push(['Mehrwertsteuer 19 %',           mwst + ' €', false]);
+    if (zahln)  amtData.push(['Zahlbetrag Versicherungsnehmer', zahln + ' €', false]);
+    if (zahlv)  amtData.push(['Zahlbetrag Versicherung',        zahlv + ' €', false]);
+    if (netto)  amtData.push(['Nettobetrag',                    netto + ' €', false]);
+    if (brutto) amtData.push(['Rechnungsbetrag gesamt (brutto)', brutto + ' €', true]);
+
+    const amtHeaderRow = new TableRow({ children: [
+      new TableCell({
+        shading:  { fill: DARK, type: ShadingType.CLEAR, color: DARK },
+        children: [new Paragraph({ children: [new TextRun({ text: 'Position', bold: true, size: 18, color: 'FFFFFF' })] })],
+        borders:  NO_BORDER, margins: cellM
+      }),
+      new TableCell({
+        shading:  { fill: DARK, type: ShadingType.CLEAR, color: DARK },
+        children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Betrag', bold: true, size: 18, color: 'FFFFFF' })] })],
+        borders:  NO_BORDER, margins: cellM
+      }),
+    ]});
+
+    const amtRows = amtData.map(r => {
+      const isTotal = r[2];
+      const topBdr  = isTotal
+        ? { style: BorderStyle.SINGLE, size: 8, color: RED }
+        : { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+      const bdrSpec = { ...THIN_BOTTOM, top: topBdr };
+      return new TableRow({ children: [
+        new TableCell({
+          shading:  isTotal ? { fill: PINK, type: ShadingType.CLEAR, color: PINK } : undefined,
+          children: [new Paragraph({ children: [new TextRun({ text: r[0], bold: isTotal, size: 20, color: isTotal ? RED : '333333' })] })],
+          borders: bdrSpec, margins: cellM
+        }),
+        new TableCell({
+          shading:  isTotal ? { fill: PINK, type: ShadingType.CLEAR, color: PINK } : undefined,
+          children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: r[1], bold: isTotal, size: 20, color: isTotal ? RED : '333333' })] })],
+          borders: bdrSpec, margins: cellM
+        }),
+      ]});
+    });
+
+    // ── Address lines ──
+    const addrLines = kunde ? kunde.split('\n') : ['–'];
+
+    // ── Assemble document ──
+    const children = [
+      // Company heading
+      new Paragraph({ children: [new TextRun({ text: 'Autoglas Gürcam', bold: true, size: 44, color: RED })] }),
+      new Paragraph({ children: [new TextRun({ text: 'Gürce Ali & Toksun Halil GbR', size: 18, color: LGRAY })] }),
+      new Paragraph({ children: [new TextRun({ text: 'Industriestraße 11 · 65779 Kelkheim (Taunus)', size: 18, color: LGRAY })] }),
+      new Paragraph({
+        children: [new TextRun({ text: 'Tel. +49 176 2350 8710 · info@autoglas-guercam.com', size: 18, color: LGRAY })],
+        border:  { bottom: { style: BorderStyle.SINGLE, size: 12, color: RED } },
+        spacing: { after: 280 }
+      }),
+      new Paragraph({ text: '', spacing: { after: 160 } }),
+      // Recipient label
+      new Paragraph({ children: [new TextRun({ text: 'An', size: 16, color: '999999' })] }),
+      ...addrLines.map(l => new Paragraph({ children: [new TextRun({ text: l || ' ', size: 22 })] })),
+      new Paragraph({ text: '', spacing: { after: 180 } }),
+      // Date
+      new Paragraph({
+        alignment: AlignmentType.RIGHT,
+        children:  [new TextRun({ text: `Kelkheim, ${rechdat || today}`, size: 18, color: '888888' })],
+        spacing:   { after: 280 }
+      }),
+      // Title
+      new Paragraph({
+        children: [new TextRun({ text: 'Rechnung für die Vorsteuerabzugsberechtigung', bold: true, size: 32 })],
+        border:   { bottom: { style: BorderStyle.SINGLE, size: 4, color: 'DDDDDD' } },
+        spacing:  { after: 280 }
+      }),
+      // Ref table
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: NO_BORDER,
+        rows: refRows
+      }),
+      new Paragraph({ text: '', spacing: { after: 200 } }),
+      // Notice box
+      new Paragraph({
+        children: [
+          new TextRun({ text: 'Hinweis: ', bold: true, size: 20 }),
+          new TextRun({ text: 'Der Versicherungsnehmer ist vorsteuerabzugsberechtigt.', size: 20 })
+        ],
+        border:  { left: { style: BorderStyle.SINGLE, size: 18, color: RED } },
+        shading: { fill: PINK, type: ShadingType.CLEAR, color: PINK },
+        indent:  { left: 280 },
+        spacing: { before: 160, after: 200 }
+      }),
+      new Paragraph({ text: '', spacing: { after: 120 } }),
+    ];
+
+    // Amounts
+    if (amtRows.length > 0) {
+      children.push(
+        new Table({
+          width:   { size: 100, type: WidthType.PERCENTAGE },
+          borders: NO_BORDER,
+          rows:    [amtHeaderRow, ...amtRows]
+        })
+      );
+    }
+
+    children.push(
+      new Paragraph({ text: '', spacing: { after: 280 } }),
+      new Paragraph({
+        children: [new TextRun({ text: 'Bitte überweisen Sie den fälligen Betrag auf untenstehendes Konto. Vielen Dank für Ihr Vertrauen.', size: 20 })],
+        spacing: { after: 400 }
+      }),
+      // Footer
+      new Paragraph({
+        children: [
+          new TextRun({ text: 'Bankverbindung: ', bold: true, size: 17, color: '444444' }),
+          new TextRun({ text: 'TAUNUS-SPARKASSE · IBAN: DE84 5125 0000 0002 2337 97 · BIC: HELADEF1TSK', size: 17, color: '777777' })
+        ],
+        border:  { top: { style: BorderStyle.SINGLE, size: 4, color: 'DDDDDD' } },
+        spacing: { before: 160 }
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: 'Steuerdaten: ', bold: true, size: 17, color: '444444' }),
+          new TextRun({ text: 'USt.IdNr.: DE357801660 · Betriebs-Nr.: 4306236', size: 17, color: '777777' })
+        ]
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: 'Kontakt: ', bold: true, size: 17, color: '444444' }),
+          new TextRun({ text: 'Tel. +49 176 2350 8710 · info@autoglas-guercam.com', size: 17, color: '777777' })
+        ]
+      })
+    );
+
+    const doc2 = new Document({
+      sections: [{
+        properties: {
+          page: {
+            margin: {
+              top:    convertInchesToTwip(1.0),
+              right:  convertInchesToTwip(1.0),
+              bottom: convertInchesToTwip(1.0),
+              left:   convertInchesToTwip(1.0),
+            }
+          }
+        },
+        children
+      }]
+    });
+
+    const blob = await Packer.toBlob(doc2);
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `Vorsteuer-Rechnung_${rechnr || 'export'}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('Word-Dokument erfolgreich heruntergeladen!', 'success');
+  } catch (err) {
+    toast('Fehler beim Word-Export: ' + err.message, 'error');
+    console.error(err);
+  }
+
+  hideLoading();
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+updatePreview();
+</script>
+</body>
+</html>
