@@ -260,22 +260,19 @@ textarea.fc { resize: vertical; min-height: 76px; }
   font-size: 10.5pt;
   color: #1a1a1a;
   transform-origin: top left;
+  display: flex; flex-direction: column;
 }
 .a4 .dh {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  padding-bottom: 18px; margin-bottom: 24px;
-  border-bottom: 3px solid #C8102E;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  padding-bottom: 12px; margin-bottom: 8px;
+  border-bottom: 3px solid #2C2C2C;
 }
-.a4 .dh-left {}
-.a4 .dco { font-size: 19pt; font-weight: 700; color: #C8102E; margin-bottom: 3px; }
-.a4 .dcs { font-size: 8.5pt; color: #555; line-height: 1.7; }
-.a4 .dlogo {
-  width: 72px; height: 72px;
-  background: #C8102E; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  color: white; font-size: 22pt; font-weight: 700; flex-shrink: 0;
+.a4 .dh-logo svg { width: 215px; height: auto; display: block; }
+.a4 .dh-addr { text-align: right; font-size: 8.5pt; color: #1a1a1a; line-height: 1.65; white-space: nowrap; }
+.a4 .dsender {
+  font-size: 7.5pt; color: #333; text-decoration: underline;
+  margin: 30px 0 8px;
 }
-.a4 .drecip-lbl { font-size: 7.5pt; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
 .a4 .drecip-addr { font-size: 10.5pt; line-height: 1.65; }
 .a4 .ddate { text-align: right; font-size: 8.5pt; color: #888; margin: 10px 0 0; }
 .a4 .dtitle {
@@ -307,11 +304,10 @@ textarea.fc { resize: vertical; min-height: 76px; }
 }
 .a4 .dpay-hint { font-size: 9.5pt; color: #444; margin: 20px 0 28px; line-height: 1.75; }
 .a4 .dfoot {
-  padding-top: 18px; border-top: 1px solid #ddd;
-  font-size: 7.5pt; color: #777; line-height: 1.85;
+  padding-top: 10px; border-top: 3px solid #2C2C2C;
+  font-size: 7.5pt; color: #333; line-height: 1.85;
 }
-.a4 .dfoot-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
-.a4 .dfoot-lbl { font-weight: 600; color: #444; font-size: 7.5pt; }
+.a4 .dfoot-grid { display: grid; grid-template-columns: 1.3fr 1.1fr 0.9fr; gap: 14px; }
 
 /* ===== DOWNLOAD BAR ===== */
 .dl-bar {
@@ -459,15 +455,15 @@ textarea.fc { resize: vertical; min-height: 76px; }
         <div class="fsec">
           <div class="fsec-title">Beträge (€)</div>
           <div class="fg">
-            <label for="f_netto">Nettobetrag</label>
+            <label for="f_netto">Nettobetrag (erscheint nicht im Dokument)</label>
             <input class="fc" id="f_netto" type="text" placeholder="0,00" oninput="updatePreview()">
           </div>
           <div class="fg">
-            <label for="f_mwst">MwSt. 19&nbsp;%</label>
+            <label for="f_mwst">MwSt.-Gesamtbetrag 19&nbsp;%</label>
             <input class="fc" id="f_mwst" type="text" placeholder="0,00" oninput="updatePreview()">
           </div>
           <div class="fg">
-            <label for="f_brutto">Rechnungsbetrag (brutto)</label>
+            <label for="f_brutto">Rechnungsbetrag brutto (erscheint nicht im Dokument)</label>
             <input class="fc" id="f_brutto" type="text" placeholder="0,00" oninput="updatePreview()">
           </div>
           <div class="fg">
@@ -545,11 +541,40 @@ textarea.fc { resize: vertical; min-height: 76px; }
 /* ============================================================
    CONFIG
    ============================================================ */
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
 
 const FORM_IDS = ['f_kunde','f_rechnr','f_rechdat','f_auftnr','f_auftdat',
                    'f_kz','f_fzg','f_netto','f_mwst','f_brutto','f_sb','f_zahln','f_zahlv'];
+
+/* Nachbau des Firmenlogos (rotes A auf grauem G + Schriftzug) als Vektor.
+   Wird in der Vorschau/PDF inline gerendert und für Word als PNG eingebettet. */
+const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="110" viewBox="0 0 320 110">
+  <text x="0" y="94" font-family="'Arial Black', Arial, sans-serif" font-size="106" font-weight="900" fill="#3A3A3A">G</text>
+  <text x="15" y="76" font-family="'Arial Black', Arial, sans-serif" font-size="80" font-weight="900" fill="#C8102E">A</text>
+  <text x="102" y="50" font-family="Arial, sans-serif" font-size="28" font-weight="bold" letter-spacing="3.5" fill="#C8102E">AUTOGLAS</text>
+  <text x="102" y="90" font-family="'Arial Black', Arial, sans-serif" font-size="33" font-weight="900" letter-spacing="4.5" fill="#1A1A1A">GÜRCAM</text>
+</svg>`;
+
+let _logoPngCache = null;
+async function renderLogoPng() {
+  if (_logoPngCache) return _logoPngCache;
+  const url = URL.createObjectURL(new Blob([LOGO_SVG], { type: 'image/svg+xml;charset=utf-8' }));
+  try {
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+    const c = document.createElement('canvas');
+    c.width = 960; c.height = 330;
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+    _logoPngCache = await blob.arrayBuffer();
+    return _logoPngCache;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
 
 /* ============================================================
    DRAG & DROP / FILE INPUT
@@ -823,32 +848,27 @@ function updatePreview() {
     ? kunde.split('\n').map(l => `<div>${esc(l)}</div>`).join('')
     : '<span style="color:#ccc;font-style:italic">Kundenanschrift</span>';
 
-  // Amount rows
+  // Betragsaufstellung: nur MwSt.-Gesamtbetrag, SB und Zahlbeträge –
+  // Netto-/Bruttobetrag der Rechnung erscheinen bewusst NICHT im Dokument.
   let amtRows = '';
-  const addRow = (label, val, cls) => {
-    if (val) amtRows += `<tr${cls?' class="'+cls+'"':''}><td>${label}</td><td>${esc(val)}&thinsp;€</td></tr>`;
-  };
-  addRow('SB-Anteil (Selbstbeteiligung)', sb);
-  addRow('Mehrwertsteuer 19&nbsp;%', mwst);
+  if (sb)    amtRows += `<tr><td>SB-Anteil (Selbstbeteiligung)</td><td>${esc(sb)}&thinsp;€</td></tr>`;
+  if (mwst)  amtRows += `<tr class="row-total"><td>MwSt.-Gesamtbetrag (19&nbsp;%)</td><td>${esc(mwst)}&thinsp;€</td></tr>`;
   if (zahln) amtRows += `<tr><td><strong>Zahlbetrag Versicherungsnehmer</strong></td><td><strong>${esc(zahln)}&thinsp;€</strong></td></tr>`;
-  addRow('Zahlbetrag Versicherung', zahlv);
-  addRow('Nettobetrag', netto);
-  if (brutto) amtRows += `<tr class="row-total"><td>Rechnungsbetrag gesamt (brutto)</td><td>${esc(brutto)}&thinsp;€</td></tr>`;
+  if (zahlv) amtRows += `<tr><td>Zahlbetrag Versicherung</td><td>${esc(zahlv)}&thinsp;€</td></tr>`;
 
   document.getElementById('a4Page').innerHTML = `
 <div class="dh">
-  <div class="dh-left">
-    <div class="dco">Autoglas Gürcam</div>
-    <div class="dcs">
-      Gürce Ali &amp; Toksun Halil GbR<br>
-      Industriestraße 11 &middot; 65779 Kelkheim (Taunus)<br>
-      Tel. +49&nbsp;176&nbsp;2350&nbsp;8710 &middot; info@autoglas-guercam.com
-    </div>
+  <div class="dh-logo">${LOGO_SVG}</div>
+  <div class="dh-addr">
+    <strong>Autoglas Gürcam</strong><br>
+    <strong>Gürce Ali &amp; Toksun Halil GbR</strong><br>
+    Industriestraße 11<br>
+    65779 Kelkheim (Taunus)<br>
+    Tel.: +49 176 2350 8710&nbsp;&nbsp;|&nbsp;&nbsp;E-Mail: info@autoglas-guercam.com
   </div>
-  <div class="dlogo">AG</div>
 </div>
 
-<div class="drecip-lbl">An</div>
+<div class="dsender">AUTOGLAS GÜRCAM - Industriestraße 11, 65779 Kelkheim</div>
 <div class="drecip-addr">${addrHtml}</div>
 <div class="ddate">Kelkheim, ${esc(rechdat) || today}</div>
 
@@ -882,20 +902,16 @@ ${amtRows ? `
 <div class="dfoot">
   <div class="dfoot-grid">
     <div>
-      <div class="dfoot-lbl">Bankverbindung</div>
-      TAUNUS-SPARKASSE<br>
-      IBAN: DE84 5125 0000 0002 2337 97<br>
-      BIC: HELADEF1TSK
+      Bank: <strong>TAUNUS-SPARKASSE</strong><br>
+      IBAN: <strong>DE84 5125 0000 0002 2337 97</strong><br>
+      BIC: <strong>HELADEF1TSK</strong>
     </div>
     <div>
-      <div class="dfoot-lbl">Steuerdaten</div>
-      USt.IdNr.: DE357801660<br>
-      Betriebs-Nr.: 4306236
+      Handwerkskammer: <strong>Frankfurt-Rhein-Main</strong><br>
+      Betriebs-Nummer: <strong>4306236</strong>
     </div>
-    <div>
-      <div class="dfoot-lbl">Kontakt</div>
-      Tel. +49 176 2350 8710<br>
-      info@autoglas-guercam.com
+    <div style="text-align:right">
+      USt.Id.Nr.: <strong>DE357801660</strong>
     </div>
   </div>
 </div>`;
@@ -1026,8 +1042,10 @@ async function downloadWord() {
     const {
       Document, Paragraph, TextRun, Table, TableRow, TableCell,
       WidthType, BorderStyle, AlignmentType, ShadingType, Packer,
-      convertInchesToTwip
+      convertInchesToTwip, Header, Footer, ImageRun, VerticalAlign
     } = docx;
+
+    const logoBuf = await renderLogoPng().catch(() => null);
 
     const rechnr  = g('f_rechnr');
     const rechdat = g('f_rechdat');
@@ -1082,14 +1100,13 @@ async function downloadWord() {
       }),
     ]}));
 
-    // ── amount table rows ──
+    // Betragsaufstellung: nur MwSt.-Gesamtbetrag, SB und Zahlbeträge –
+    // Netto-/Bruttobetrag der Rechnung erscheinen bewusst NICHT im Dokument.
     const amtData = [];
-    if (sb)     amtData.push(['SB-Anteil (Selbstbeteiligung)', sb + ' €', false]);
-    if (mwst)   amtData.push(['Mehrwertsteuer 19 %',           mwst + ' €', false]);
-    if (zahln)  amtData.push(['Zahlbetrag Versicherungsnehmer', zahln + ' €', false]);
-    if (zahlv)  amtData.push(['Zahlbetrag Versicherung',        zahlv + ' €', false]);
-    if (netto)  amtData.push(['Nettobetrag',                    netto + ' €', false]);
-    if (brutto) amtData.push(['Rechnungsbetrag gesamt (brutto)', brutto + ' €', true]);
+    if (sb)     amtData.push(['SB-Anteil (Selbstbeteiligung)',   sb + ' €', false]);
+    if (mwst)   amtData.push(['MwSt.-Gesamtbetrag (19 %)',       mwst + ' €', true]);
+    if (zahln)  amtData.push(['Zahlbetrag Versicherungsnehmer',  zahln + ' €', false]);
+    if (zahlv)  amtData.push(['Zahlbetrag Versicherung',         zahlv + ' €', false]);
 
     const amtHeaderRow = new TableRow({ children: [
       new TableCell({
@@ -1127,20 +1144,81 @@ async function downloadWord() {
     // ── Address lines ──
     const addrLines = kunde ? kunde.split('\n') : ['–'];
 
-    // ── Assemble document ──
+    // ── Kopfzeile: Briefkopf mit Logo + Firmenanschrift ──
+    const headerLine = { bottom: { style: BorderStyle.SINGLE, size: 24, color: DARK } };
+    const docHeader = new Header({
+      children: [
+        new Table({
+          width:   { size: 100, type: WidthType.PERCENTAGE },
+          borders: NO_BORDER,
+          rows: [new TableRow({ children: [
+            new TableCell({
+              children: [
+                logoBuf
+                  ? new Paragraph({ children: [new ImageRun({ data: logoBuf, transformation: { width: 200, height: 69 } })] })
+                  : new Paragraph({ children: [new TextRun({ text: 'AUTOGLAS GÜRCAM', bold: true, size: 40, color: RED })] })
+              ],
+              borders: { ...NO_BORDER, ...headerLine },
+              verticalAlign: VerticalAlign.BOTTOM,
+              width: { size: 45, type: WidthType.PERCENTAGE }
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Autoglas Gürcam', bold: true, size: 18 })] }),
+                new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Gürce Ali & Toksun Halil GbR', bold: true, size: 18 })] }),
+                new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Industriestraße 11', size: 18 })] }),
+                new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: '65779 Kelkheim (Taunus)', size: 18 })] }),
+                new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Tel.: +49 176 2350 8710   |   E-Mail: info@autoglas-guercam.com', size: 17 })] }),
+              ],
+              borders: { ...NO_BORDER, ...headerLine },
+              verticalAlign: VerticalAlign.BOTTOM,
+              width: { size: 55, type: WidthType.PERCENTAGE }
+            }),
+          ]})]
+        })
+      ]
+    });
+
+    // ── Fußzeile: Bank | Handwerkskammer | USt.IdNr. ──
+    const footerLine = { top: { style: BorderStyle.SINGLE, size: 24, color: DARK } };
+    const footCell = (paras, align) => new TableCell({
+      children: paras.map(p => new Paragraph({
+        alignment: align || AlignmentType.LEFT,
+        children: p.map(([t, b]) => new TextRun({ text: t, bold: !!b, size: 14, color: '333333' }))
+      })),
+      borders: { ...NO_BORDER, ...footerLine },
+      margins: { top: 100, bottom: 40, left: 0, right: 0 }
+    });
+    const docFooter = new Footer({
+      children: [
+        new Table({
+          width:   { size: 100, type: WidthType.PERCENTAGE },
+          borders: NO_BORDER,
+          rows: [new TableRow({ children: [
+            footCell([
+              [['Bank: '], ['TAUNUS-SPARKASSE', true]],
+              [['IBAN: '], ['DE84 5125 0000 0002 2337 97', true]],
+              [['BIC: '], ['HELADEF1TSK', true]],
+            ]),
+            footCell([
+              [['Handwerkskammer: '], ['Frankfurt-Rhein-Main', true]],
+              [['Betriebs-Nummer: '], ['4306236', true]],
+            ]),
+            footCell([
+              [['USt.Id.Nr.: '], ['DE357801660', true]],
+            ], AlignmentType.RIGHT),
+          ]})]
+        })
+      ]
+    });
+
+    // ── Assemble document body ──
     const children = [
-      // Company heading
-      new Paragraph({ children: [new TextRun({ text: 'Autoglas Gürcam', bold: true, size: 44, color: RED })] }),
-      new Paragraph({ children: [new TextRun({ text: 'Gürce Ali & Toksun Halil GbR', size: 18, color: LGRAY })] }),
-      new Paragraph({ children: [new TextRun({ text: 'Industriestraße 11 · 65779 Kelkheim (Taunus)', size: 18, color: LGRAY })] }),
+      // Absenderzeile (klein, unterstrichen – wie im Original-Briefkopf)
       new Paragraph({
-        children: [new TextRun({ text: 'Tel. +49 176 2350 8710 · info@autoglas-guercam.com', size: 18, color: LGRAY })],
-        border:  { bottom: { style: BorderStyle.SINGLE, size: 12, color: RED } },
-        spacing: { after: 280 }
+        children: [new TextRun({ text: 'AUTOGLAS GÜRCAM - Industriestraße 11, 65779 Kelkheim', size: 15, underline: {} })],
+        spacing: { after: 220 }
       }),
-      new Paragraph({ text: '', spacing: { after: 160 } }),
-      // Recipient label
-      new Paragraph({ children: [new TextRun({ text: 'An', size: 16, color: '999999' })] }),
       ...addrLines.map(l => new Paragraph({ children: [new TextRun({ text: l || ' ', size: 22 })] })),
       new Paragraph({ text: '', spacing: { after: 180 } }),
       // Date
@@ -1191,28 +1269,7 @@ async function downloadWord() {
       new Paragraph({ text: '', spacing: { after: 280 } }),
       new Paragraph({
         children: [new TextRun({ text: 'Bitte überweisen Sie den fälligen Betrag auf untenstehendes Konto. Vielen Dank für Ihr Vertrauen.', size: 20 })],
-        spacing: { after: 400 }
-      }),
-      // Footer
-      new Paragraph({
-        children: [
-          new TextRun({ text: 'Bankverbindung: ', bold: true, size: 17, color: '444444' }),
-          new TextRun({ text: 'TAUNUS-SPARKASSE · IBAN: DE84 5125 0000 0002 2337 97 · BIC: HELADEF1TSK', size: 17, color: '777777' })
-        ],
-        border:  { top: { style: BorderStyle.SINGLE, size: 4, color: 'DDDDDD' } },
-        spacing: { before: 160 }
-      }),
-      new Paragraph({
-        children: [
-          new TextRun({ text: 'Steuerdaten: ', bold: true, size: 17, color: '444444' }),
-          new TextRun({ text: 'USt.IdNr.: DE357801660 · Betriebs-Nr.: 4306236', size: 17, color: '777777' })
-        ]
-      }),
-      new Paragraph({
-        children: [
-          new TextRun({ text: 'Kontakt: ', bold: true, size: 17, color: '444444' }),
-          new TextRun({ text: 'Tel. +49 176 2350 8710 · info@autoglas-guercam.com', size: 17, color: '777777' })
-        ]
+        spacing: { after: 200 }
       })
     );
 
@@ -1221,13 +1278,15 @@ async function downloadWord() {
         properties: {
           page: {
             margin: {
-              top:    convertInchesToTwip(1.0),
+              top:    convertInchesToTwip(1.6),
               right:  convertInchesToTwip(1.0),
-              bottom: convertInchesToTwip(1.0),
+              bottom: convertInchesToTwip(1.3),
               left:   convertInchesToTwip(1.0),
             }
           }
         },
+        headers: { default: docHeader },
+        footers: { default: docFooter },
         children
       }]
     });
