@@ -447,6 +447,18 @@ textarea.fc { resize: vertical; min-height: 76px; }
           </div>
         </div>
 
+        <div class="fsec">
+          <div class="fsec-title">Logo</div>
+          <div class="fg">
+            <label for="f_logo">Original-Logo (PNG/JPG) – wird nur lokal im Browser gespeichert</label>
+            <input class="fc" id="f_logo" type="file" accept="image/png,image/jpeg,image/webp">
+          </div>
+          <button type="button" onclick="resetLogo()"
+                  style="background:none;border:none;padding:0;color:var(--text-muted);font-size:12px;cursor:pointer;text-decoration:underline;font-family:var(--font)">
+            Logo zurücksetzen (Nachbau verwenden)
+          </button>
+        </div>
+
       </div>
     </div>
 
@@ -529,30 +541,69 @@ const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="38
   </defs>
   <path d="M 313 104 A 150 150 0 1 0 313 276" fill="none" stroke="url(#lgG)" stroke-width="72"/>
   <path d="M193 2 L237 2 L352 380 L298 380 L215 122 L132 380 L78 380 Z" fill="url(#lgA)"/>
+  <path d="M177 222 L253 222 L259 258 L171 258 Z" fill="url(#lgA)"/>
   <rect x="160" y="158" width="216" height="64" fill="url(#lgG)"/>
+  <rect x="312" y="222" width="64" height="68" fill="url(#lgG)"/>
   <text x="408" y="222" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="#C8102E" textLength="385" lengthAdjust="spacingAndGlyphs">AUTOGLAS</text>
   <text x="408" y="342" font-family="'Arial Black', Arial, sans-serif" font-size="92" font-weight="900" fill="#141414" textLength="385" lengthAdjust="spacingAndGlyphs">GÜRCAM</text>
 </svg>`;
 
+/* Eigenes Logo: wird einmal hochgeladen, lokal im Browser gespeichert
+   (localStorage) und hat dann Vorrang vor dem SVG-Nachbau. */
+let customLogo = null;
+try { customLogo = localStorage.getItem('agLogo'); } catch (e) {}
+
+function logoHtml() {
+  return customLogo
+    ? `<img src="${customLogo}" style="width:205px;display:block" alt="Autoglas Gürcam">`
+    : LOGO_SVG;
+}
+
 let _logoCache = null;
 async function renderLogo() {
   if (_logoCache) return _logoCache;
+  const img = new Image();
+  if (customLogo) {
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = customLogo; });
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    c.getContext('2d').drawImage(img, 0, 0);
+    const dataUrl = c.toDataURL('image/png');
+    const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+    _logoCache = { buf: await blob.arrayBuffer(), dataUrl, w: c.width, h: c.height };
+    return _logoCache;
+  }
   const url = URL.createObjectURL(new Blob([LOGO_SVG], { type: 'image/svg+xml;charset=utf-8' }));
   try {
-    const img = new Image();
     await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
     const c = document.createElement('canvas');
     c.width = 1200; c.height = 570;
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
     const dataUrl = c.toDataURL('image/png');
     const blob = await new Promise(r => c.toBlob(r, 'image/png'));
-    _logoCache = { buf: await blob.arrayBuffer(), dataUrl };
+    _logoCache = { buf: await blob.arrayBuffer(), dataUrl, w: 1200, h: 570 };
     return _logoCache;
   } finally {
     URL.revokeObjectURL(url);
   }
 }
-async function renderLogoPng() { return (await renderLogo()).buf; }
+
+function setCustomLogo(dataUrl) {
+  try { localStorage.setItem('agLogo', dataUrl); } catch (e) {}
+  customLogo = dataUrl;
+  _logoCache = null;
+  updatePreview();
+}
+
+function resetLogo() {
+  try { localStorage.removeItem('agLogo'); } catch (e) {}
+  customLogo = null;
+  _logoCache = null;
+  const inp = document.getElementById('f_logo');
+  if (inp) inp.value = '';
+  updatePreview();
+  toast('Logo zurückgesetzt – Nachbau wird verwendet.', 'success');
+}
 
 /* ============================================================
    DRAG & DROP / FILE INPUT
@@ -574,6 +625,18 @@ dropZone.addEventListener('click', e => {
 });
 fileInput.addEventListener('change', e => {
   if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+document.getElementById('f_logo').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    setCustomLogo(r.result);
+    toast('Logo übernommen – wird ab jetzt in allen Dokumenten verwendet.', 'success');
+  };
+  r.onerror = () => toast('Logo konnte nicht gelesen werden.', 'error');
+  r.readAsDataURL(f);
 });
 
 /* ============================================================
@@ -795,7 +858,7 @@ function updatePreview() {
   // Briefinhalt 1:1 nach Vorlage – einziger ausgewiesener Betrag ist die MwSt.
   document.getElementById('a4Page').innerHTML = `
 <div class="dh">
-  <div class="dh-logo">${LOGO_SVG}</div>
+  <div class="dh-logo">${logoHtml()}</div>
   <div class="dh-addr">
     <strong>Autoglas Gürcam</strong><br>
     <strong>Gürce Ali &amp; Toksun Halil GbR</strong><br>
@@ -999,7 +1062,7 @@ async function downloadWord() {
       TabStopType, Tab
     } = docx;
 
-    const logoBuf = await renderLogoPng().catch(() => null);
+    const logo = await renderLogo().catch(() => null);
 
     const rechnr  = g('f_rechnr');
     const rechdat = g('f_rechdat');
@@ -1042,8 +1105,8 @@ async function downloadWord() {
           rows: [new TableRow({ children: [
             new TableCell({
               children: [
-                logoBuf
-                  ? new Paragraph({ children: [new ImageRun({ data: logoBuf, transformation: { width: 190, height: 90 } })] })
+                logo
+                  ? new Paragraph({ children: [new ImageRun({ data: logo.buf, transformation: { width: 190, height: Math.round(190 * logo.h / logo.w) } })] })
                   : new Paragraph({ children: [new TextRun({ text: 'AUTOGLAS GÜRCAM', bold: true, size: 40, color: RED })] })
               ],
               borders: NO_BORDER,
